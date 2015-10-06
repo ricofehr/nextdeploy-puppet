@@ -1,0 +1,54 @@
+[submodule "apache"]
+	path = apache
+	url = https://github.com/puppetlabs/puppetlabs-apache
+[submodule "apt"]
+	path = apt
+	url = https://github.com/puppetlabs/puppetlabs-apt.git
+[submodule "concat"]
+	path = concat
+	url = https://github.com/puppetlabs/puppetlabs-concat.git
+[submodule "elasticsearch"]
+	path = elasticsearch
+	url = https://github.com/elastic/puppet-elasticsearch.git
+[submodule "gcc"]
+	path = gcc
+	url = https://github.com/puppetlabs/puppetlabs-gcc.git
+[submodule "inifile"]
+	path = inifile
+	url = https://github.com/puppetlabs/puppetlabs-inifile.git
+[submodule "memcached"]
+	path = memcached
+	url = https://github.com/saz/puppet-memcached
+[submodule "mongodb"]
+	path = mongodb
+	url = https://github.com/puppetlabs/puppetlabs-mongodb.git
+[submodule "mysql"]
+	path = mysql
+	url = https://github.com/puppetlabs/puppetlabs-mysql.git
+[submodule "ntp"]
+	path = ntp
+	url = https://github.com/puppetlabs/puppetlabs-ntp.git
+[submodule "php"]
+	path = php
+	url = https://github.com/thias/puppet-php.git
+[submodule "rabbitmq"]
+	path = rabbitmq
+	url = https://github.com/puppetlabs/puppetlabs-rabbitmq.git
+[submodule "redis"]
+	path = redis
+	url = https://github.com/thomasvandoren/puppet-redis.git
+[submodule "staging"]
+	path = staging
+	url = https://github.com/nanliu/puppet-staging.git
+[submodule "stdlib"]
+	path = stdlib
+	url = https://github.com/puppetlabs/puppetlabs-stdlib.git
+[submodule "sysctl"]
+	path = sysctl
+	url = https://github.com/duritong/puppet-sysctl.git
+[submodule "wget"]
+	path = wget
+	url = https://github.com/maestrodev/puppet-wget.git
+[submodule "nodejs"]
+	path = nodejs
+	url = https://github.com/puppetlabs/puppetlabs-nodejs.git
