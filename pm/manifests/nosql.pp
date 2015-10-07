@@ -13,7 +13,9 @@ class pm::nosql::mongo {
   manage_package_repo => true,
   }
   ->
-  class {'::mongodb::server': }
+  class {'::mongodb::server': 
+    pidfilepath => '/tmp/mongod.pid'
+  }
 }
 
 
