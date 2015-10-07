@@ -15,7 +15,10 @@ class pm::http {
     default_mods        => false,
     default_vhost => false,
     mpm_module => 'prefork',
-    service_ensure => true
+    service_ensure => true,
+    user => 'modem',
+    manage_user => false,
+    logroot_mode => '0775'
   }
 
   file { '/etc/apache2/mime.types':
@@ -89,7 +92,7 @@ Disallow: /'
 
   #install mongo extension only if mongo is part of the project
   $is_mongo = hiera("is_mongo", "no")
-  if $is_cron == "yes" {
+  if $is_mongo == "yes" {
     exec { "pecl-mongo":
       command => "/usr/bin/yes '' | /usr/bin/pecl install --force mongo-1.5.8",
       user => "root",
@@ -113,6 +116,15 @@ Disallow: /'
 
   php::module { [ 'mysql', 'redis', 'memcached', 'gd', 'curl', 'intl', 'mcrypt' ]: }
 
+  # install pm_tools only if auth is enabled
+  $is_auth = hiera("is_auth", "no")
+  if $is_auth == "yes" {
+    file { '/var/www/pm_tools':
+      ensure => directory,
+      recurse => remote,
+      source => 'puppet:///modules/pm/pm_tools'
+    }
+  }
 
   #php::module::ini { 'apc':
   #  settings => {

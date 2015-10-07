@@ -12,6 +12,7 @@ class pm::varnish {
 
   $v = hiera('varnish_version')
   $auth = hiera('varnish_auth', '')
+  $is_auth = hiera("is_auth", "no")
 
   package { 'varnish':
     ensure => present,
@@ -38,11 +39,15 @@ class pm::varnish {
       "puppet:///modules/pm/varnish/default.vcl",
     ]
   }
-  ->
-  exec { 'authbasic':
-    command => "sed -i 's%###AUTH###%${auth}%' /etc/varnish/default.vcl"
+  
+  if $is_auth == "yes" {
+    exec { 'authbasic':
+      command => "/bin/sed -i 's,###AUTH###,,;s,%%BASICAUTH%%,${auth},' /etc/varnish/default.vcl",
+      require => File['/etc/varnish/default.vcl'],
+      before => Exec['statusok2']
+    }
   }
-  ->
+
   exec { 'statusok2':
     command => 'sed -i "s;###STATUSOK;;" /etc/varnish/default.vcl',
     user => 'root',
@@ -64,7 +69,7 @@ class pm::varnish {
   ->
   exec { 'systemctl-reload':
     command => 'systemctl daemon-reload',
-    onlyif => 'test -f /lib/systemd/system/varnish.service'
+    onlyif => 'test -f /lib/systemd/system/varnish.service && test -f /bin/systemctl'
   }
   ->
   exec { 'restartvarnish':
