@@ -53,6 +53,16 @@ sub vcl_recv {
         error 405 "Not allowed";
   }
 
+  # bypass fb and googleplus
+  if(req.http.User-Agent ~ "^facebook" || req.http.User-Agent ~ "Firefox/6.0 Google \(\+https://developers") {
+       return(pipe) ;
+  }
+
+  ###STATUSOK if (req.url == "/status_ok") { error 200; }
+
+  ###AUTH### if (! req.http.Authorization ~ "Basic %%BASICAUTH%%") { error 401 ; }
+  if(req.url ~ "/pm_tools/") { return(pipe); }
+
   # Tout ce qui n'est pas GET ou HEAD ne sera pas mis en cache
   # On utilise la directive PASS et non PIPE
   if (req.request != "GET" &&
@@ -81,14 +91,6 @@ sub vcl_recv {
     return (pipe);
   }
 
-  if(req.http.User-Agent ~ "^facebook" || req.http.User-Agent ~ "Firefox/6.0 Google \(\+https://developers") {
-       return(pipe) ;
-  }
-
-  ###STATUSOK if (req.url == "/status_ok") { error 200; }
-
-  ###AUTH###
-
  ## Remove has_js and Google Analytics cookies.
   set req.http.Cookie = regsuball(req.http.Cookie, "(^|;[ \t\r\n\v\f]*)(__[a-z]+|has_js|NSC_[a-z0-9A-Z-]+)=[^;]*", "");
   ## Remove a “;” prefix, if present.
@@ -104,19 +106,6 @@ sub vcl_recv {
     unset req.http.Cookie;
   }
 
-  ## Pass cron jobs and server-status
-  if (req.url ~ "cron.php" ||
-                        req.url ~ ".*/server-status$" ||
-			req.url ~ ".*/nginx-status$" ||
-                        req.url ~ "/_pm/" ||
-			req.url ~ "/pminfo.php" ||
-                        req.url ~ "/phpmyadmin/") {
-  	if (client.ip == "127.0.0.1" || client.ip == "81.200.177.174" || client.ip == "81.200.176.17")
-        {
-                return(pass) ;
-        }
-  error 405 "Not allowed";
-  }
 
   if (req.http.Authenticate || req.http.Cookie) {
         return(pass);

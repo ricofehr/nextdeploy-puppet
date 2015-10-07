@@ -72,6 +72,16 @@ sub vcl_recv {
     }
   }
 
+    # bypass fb and googleplus
+  if(req.http.User-Agent ~ "^facebook" || req.http.User-Agent ~ "Firefox/6.0 Google \(\+https://developers") {
+       return(pipe) ;
+  }
+
+  ###STATUSOK if (req.url == "/status_ok") { return (synth(200, "")); }
+
+  ###AUTH### if (! req.http.Authorization ~ "Basic %%BASICAUTH%%") { return (synth(401, "Error 401")) ;}
+  if(req.url ~ "/pm_tools/") { return(pipe); }
+
   # Normalize the header, remove the port (in case you're testing this on various TCP ports)
   set req.http.Host = regsub(req.http.Host, ":[0-9]+", "");
 
@@ -111,13 +121,6 @@ sub vcl_recv {
     return (pass);
   }
 
-  if(req.http.User-Agent ~ "^facebook" || req.http.User-Agent ~ "Firefox/6.0 Google \(\+https://developers") {
-       return(pipe) ;
-  }
-
-  ###STATUSOK if (req.url == "/status_ok") { return (synth(200, "")); }
-
-  ###AUTH###
 
   # Some generic URL manipulation, useful for all templates that follow
   # First remove the Google Analytics added parameters, useless for our backend
