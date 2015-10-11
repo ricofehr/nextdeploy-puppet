@@ -52,3 +52,6 @@
 [submodule "nodejs"]
 	path = nodejs
 	url = https://github.com/puppetlabs/puppetlabs-nodejs.git
+[submodule "ssh"]
+	path = ssh
+	url = https://github.com/saz/puppet-ssh

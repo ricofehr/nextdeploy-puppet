@@ -13,7 +13,11 @@ class pm::base::apt {
 
   exec { "apt-update":
     command => "apt-get update",
-    timeout => 1800
+    timeout => 1800,
+    unless => 'test -f /home/modem/.touchaptupdate'
+  } ->
+  exec { "touchaptupdate":
+    command => 'touch /home/modem/.touchaptupdate',
   }
 }
 
@@ -85,10 +89,6 @@ LC_ALL=en_US.UTF-8",
     shell => '/bin/bash'
   }
   ->
-  exec { 'passwd_modem':
-    command => 'yes modem | passwd modem'
-  }
-  ->
   # Ensure the .ssh directory exists with the right permissions
   file { "/home/modem/.ssh":
     ensure            =>  directory,
@@ -122,5 +122,15 @@ LC_ALL=en_US.UTF-8",
     group             =>  www-data,
     mode              =>  '0600',
     source => "puppet:///modules/pm/sshkeys/${email}.authorized_keys"
+  } ->
+  class { 'ssh::server':
+    storeconfigs_enabled => false,
+    options => {
+      'AllowUsers' => ['modem'],
+      'X11Forwarding' => 'no',
+      'PasswordAuthentication' => 'no',
+      'PermitRootLogin'        => 'no',
+      'Port'                   => [22],
+    },
   }
 }
