@@ -338,20 +338,6 @@ class pm::deploy::wordpress {
 }
 
 
-# == Class: pm::deploy::tools
-#
-# Deploy some development scripts, TODO
-#
-#
-# === Authors
-#
-# Eric Fehr <eric.fehr@publicis-modem.fr>
-#
-class pm::deploy::tools {
-  Exec { path => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/", "/usr/local/bin", "/opt/bin" ] }
-}
-
-
 # == Class: pm::deploy::postinstall
 #
 # Some extra tasks to execute after project installation
@@ -365,6 +351,8 @@ class pm::deploy::postinstall {
   $docroot = hiera('docrootgit', '/var/www/html')
   $weburi = hiera('weburi', '')
   $email = hiera('email')
+  $mvmcuri = hiera('mvmcuri', 'mvmc.local')
+  $project = hiera('project', '')
 
   Exec {
     path => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/", "/usr/local/bin", "/opt/bin" ],
@@ -389,6 +377,25 @@ class pm::deploy::postinstall {
     command => "/bin/bash scripts/postinstall.sh ${weburi} admin.${weburi} m.${weburi}",
   }
   ->
+  exec { 'touch_cron':
+    command => 'touch scripts/crontab',
+  }
+  ->
+  exec { 'copy_cron':
+    command => 'cp scripts/crontab /var/spool/cron/crontabs/modem',
+    user => 'root'
+  }
+  ->
+  exec { 'chown_cron':
+    command => 'chown modem: /var/spool/cron/crontabs/modem',
+    user => 'root'
+  }
+  ->
+  exec { 'restart_cron':
+    command => 'service cron restart',
+    user => 'root'
+  }
+  ->
   exec { 'statusvarnish':
     command => 'sed -i "s;###STATUSOK;;" /etc/varnish/default.vcl',
     user => 'root'
@@ -399,11 +406,11 @@ class pm::deploy::postinstall {
     user => 'root'
   }
   ->
+  exec { 'mail_endinstall':
+    command => "echo 'Your vm for the project ${project} is installed and ready to work. Connect to your mvmc account (http://${mvmcuri}/) for getting urls and others access.' | mail -s '[MVMC] Vm installed' ${email}"
+  }
+  ->
   exec { 'touchpostinstall':
     command => 'touch /home/modem/.postinstall'
   }
-  #->
-  #exec { 'mail_endinstall':
-  #  command => "echo 'Your vm is installed and ready to work. Connect to your mvmc account for getting urls and others access.' | mail -s '[MVMC] Vm installed' ${email}"
-  #}
 }
