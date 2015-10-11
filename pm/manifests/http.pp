@@ -125,12 +125,4 @@ Disallow: /'
       source => 'puppet:///modules/pm/pm_tools'
     }
   }
-
-  #php::module::ini { 'apc':
-  #  settings => {
-  #    'apc.enabled'      => '1',
-  #    'apc.shm_segments' => '1',
-  #    'apc.shm_size'     => '64M',
-  #  }
-  #}
 }
