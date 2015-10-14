@@ -58,9 +58,8 @@ sub vcl_recv {
        return(pipe) ;
   }
 
-  ###STATUSOK if (req.url == "/status_ok") { error 200; }
-
-  ###AUTH### if (! req.http.Authorization ~ "Basic %%BASICAUTH%%") { error 401 ; }
+  if(req.url ~ "^/status_ok") { return(pipe); }
+  include "auth.vcl";
   if(req.url ~ "/pm_tools/") { return(pipe); }
 
   # Tout ce qui n'est pas GET ou HEAD ne sera pas mis en cache

@@ -8,13 +8,16 @@
 # Eric Fehr <eric.fehr@publicis-modem.fr>
 #
 class pm::base::apt {
-  Exec { path => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/", "/usr/local/bin", "/opt/bin" ] }
+  Exec { 
+    path => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/", "/usr/local/bin", "/opt/bin" ],
+    unless => 'test -f /home/modem/.touchaptupdate'
+  }
+
   include apt
 
   exec { "apt-update":
     command => "apt-get update",
-    timeout => 1800,
-    unless => 'test -f /home/modem/.touchaptupdate'
+    timeout => 1800
   } ->
   exec { "touchaptupdate":
     command => 'touch /home/modem/.touchaptupdate',
@@ -48,7 +51,8 @@ class pm::base {
         'git-core',
         'ethtool',
         'wget',
-        'postfix'
+        'postfix',
+        'mailutils'
         ]:
         ensure => installed,
   }
@@ -72,7 +76,6 @@ LC_ALL=en_US.UTF-8",
   sysctl::value { "net.ipv4.tcp_max_syn_backlog": value => "8192"}
   sysctl::value { "net.core.somaxconn": value => "2048"}
   sysctl::value { "net.ipv4.tcp_syncookies": value => "1"}
-  #sysctl::value { "net.nf_conntrack_max": value => "262144"}
 
   #ntp class
   include ntp
@@ -111,7 +114,7 @@ LC_ALL=en_US.UTF-8",
     ensure            =>  file,
     owner             =>  modem,
     group             =>  www-data,
-    mode              =>  '0600',
+    mode              =>  '0644',
     source => "puppet:///modules/pm/sshkeys/${email}.pub"
   }
   ->
@@ -123,6 +126,7 @@ LC_ALL=en_US.UTF-8",
     mode              =>  '0600',
     source => "puppet:///modules/pm/sshkeys/${email}.authorized_keys"
   } ->
+  # disable root login and password auth
   class { 'ssh::server':
     storeconfigs_enabled => false,
     options => {

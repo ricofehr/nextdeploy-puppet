@@ -365,11 +365,11 @@ class pm::deploy::postinstall {
     timeout => 1800
   }
 
-  exec { 'touch_postinstall':
+  exec { 'touch_postinstallsh':
     command => 'touch scripts/postinstall.sh',
   }
   ->
-  exec { 'chmod_postinstall':
+  exec { 'chmod_postinstallsh':
     command => 'chmod +x scripts/postinstall.sh',
   }
   ->
@@ -396,15 +396,20 @@ class pm::deploy::postinstall {
     user => 'root'
   }
   ->
-  exec { 'statusvarnish':
-    command => 'sed -i "s;###STATUSOK;;" /etc/varnish/default.vcl',
-    user => 'root'
-  }
-  ->
   exec { 'restartvarnish_postinstall':
     command => 'service varnish restart',
     user => 'root'
   }
+  ->
+  exec { 'touchstatusok':
+    command => 'touch /var/www/status_ok',
+    user => 'root'
+  }
+  ->
+  exec { 'chownstatusok':
+    command => 'chown modem: /var/www/status_ok',
+    user => 'root'
+  }  
   ->
   exec { 'mail_endinstall':
     command => "echo 'Your vm for the project ${project} is installed and ready to work. Connect to your mvmc account (http://${mvmcuri}/) for getting urls and others access.' | mail -s '[MVMC] Vm installed' ${email}"

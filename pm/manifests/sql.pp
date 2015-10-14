@@ -8,7 +8,10 @@
 # Eric Fehr <eric.fehr@publicis-modem.fr>
 #
 class pm::sql {
-  Exec { path => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/", "/usr/local/bin", "/opt/bin" ] }
+  Exec {
+    path => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/", "/usr/local/bin", "/opt/bin" ],
+    unless => 'test -f /root/.sqlrestart'
+  }
 
   #mysql setting
   class { '::mysql::server':
@@ -16,8 +19,7 @@ class pm::sql {
   }
 
   exec {'restart-mysql':
-    command => 'service mysql restart',
-    unless => 'test -f /root/.sqlrestart'
+    command => 'service mysql restart'
   }
   ->
   exec { 'touchsqlrestart':

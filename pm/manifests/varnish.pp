@@ -11,8 +11,6 @@ class pm::varnish {
   Exec { path => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/", "/usr/local/bin", "/opt/bin" ] }
 
   $v = hiera('varnish_version')
-  $auth = hiera('varnish_auth', '')
-  $is_auth = hiera("is_auth", "no")
 
   package { 'varnish':
     ensure => present,
@@ -21,60 +19,46 @@ class pm::varnish {
   file { '/lib/systemd/system/varnish.service':
     ensure => file,
     mode   => 644,
-    source => 'puppet:///modules/pm/varnish/varnish.service'
+    source => "puppet:///modules/pm/varnish/varnish.service.${v}"
   }
   ->
   file { '/etc/default/varnish':
     ensure => file,
     mode   => 644,
-    source => 'puppet:///modules/pm/varnish/varnish_default'
+    source => "puppet:///modules/pm/varnish/varnish_default.${v}"
   }
   ->
   file { '/etc/varnish/default.vcl':
     ensure => file,
     mode   => 644,
     source => [
-      "puppet:///modules/profiles/varnish/default.vcl.$fqdn",
-      "puppet:///modules/pm/varnish/default.vcl.${v}",
-      "puppet:///modules/pm/varnish/default.vcl",
+      "puppet:///modules/pm/varnish/default.vcl.${v}"
     ]
-  }
-  
-  if $is_auth == "yes" {
-    exec { 'authbasic':
-      command => "/bin/sed -i 's,###AUTH###,,;s,%%BASICAUTH%%,${auth},' /etc/varnish/default.vcl",
-      require => File['/etc/varnish/default.vcl'],
-      before => Exec['statusok2']
-    }
-  }
-
-  exec { 'statusok2':
-    command => 'sed -i "s;###STATUSOK;;" /etc/varnish/default.vcl',
-    user => 'root',
-    onlyif => 'test -f /home/modem/.postinstall'
-  }
-  ->
-  file { '/etc/varnish/devicedetect.vcl':
+  } ->
+  file { '/etc/varnish/auth.vcl':
     ensure => file,
     mode   => 644,
     source => [
-      "puppet:///modules/pm/varnish/devicedetect.vcl",
+      "puppet:///modules/pm/varnish/auth/auth.vcl_${fqdn}",
+      "puppet:///modules/pm/varnish/auth.vcl"
     ]
-  }
-  ->
+  } ->
   service { 'varnish':
     ensure     => running,
     enable     => true,
   }
   ->
+  # ugly condition (check if varnish is listening on port 80)
   exec { 'systemctl-reload':
     command => 'systemctl daemon-reload',
-    onlyif => 'test -f /lib/systemd/system/varnish.service && test -f /bin/systemctl'
+    onlyif => 'test -f /lib/systemd/system/varnish.service && test -f /bin/systemctl',
+    unless => 'ps aux | grep varnish | grep "a :80" | grep -v grep'
   }
   ->
+  # ugly condition (check if varnish is listening on port 80)
   exec { 'restartvarnish':
     command => 'service varnish restart',
-    unless => 'ps aux | grep varnish | grep "-a :80" | grep -v grep',
+    unless => 'ps aux | grep varnish | grep "a :80" | grep -v grep',
   }
 
   file { '/etc/default/varnishncsa':

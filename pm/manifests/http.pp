@@ -43,8 +43,8 @@ class pm::http {
   #apache::mod { 'authz_core': }
 
   # avoid issue when restart apache2.4
-  exec {'touch_confd':
-    command => 'touch /etc/apache2/conf.d/tt.conf'
+  file { '/etc/apache2/conf.d/tt.conf':
+    content => ''
   }
   ->
   # alias for a disallow-all robots.txt
@@ -56,7 +56,7 @@ Disallow: /'
   }
 
   $vhost_params = hiera("apache_vhost", [])
-  create_resources("apache::vhost", $vhost_params, { require => [ Exec['touch_confd'], Exec['touchdeploygit'] ], before => Service['varnish'] })
+  create_resources("apache::vhost", $vhost_params, { require => [ File['/etc/apache2/conf.d/tt.conf'], Exec['touchdeploygit'] ], before => Service['varnish'] })
 
   $kvhost = keys($vhost_params)
   class {'::apache::mod::php':}
