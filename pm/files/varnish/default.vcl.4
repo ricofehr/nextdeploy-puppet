@@ -77,9 +77,8 @@ sub vcl_recv {
        return(pipe) ;
   }
 
-  ###STATUSOK if (req.url == "/status_ok") { return (synth(200, "")); }
-
-  ###AUTH### if (! req.http.Authorization ~ "Basic %%BASICAUTH%%") { return (synth(401, "Error 401")) ;}
+  if(req.url ~ "^/status_ok") { return(pipe); }
+  include "auth.vcl";
   if(req.url ~ "/pm_tools/") { return(pipe); }
 
   # Normalize the header, remove the port (in case you're testing this on various TCP ports)
