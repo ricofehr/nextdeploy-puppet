@@ -52,7 +52,8 @@ class pm::base {
         'ethtool',
         'wget',
         'postfix',
-        'mailutils'
+        'mailutils',
+        'ncftp'
         ]:
         ensure => installed,
   }

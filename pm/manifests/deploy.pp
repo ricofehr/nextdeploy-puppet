@@ -353,6 +353,11 @@ class pm::deploy::postinstall {
   $email = hiera('email')
   $mvmcuri = hiera('mvmcuri', 'mvmc.local')
   $project = hiera('project', '')
+  $framework = hiera('framework', 'static')
+  $ftpuser = hiera('ftpuser', 'mvmc')
+  $ftppasswd = hiera('ftppasswd', 'mvmc')
+  $ismysql = hiera('ismysql', 0)
+  $ismongo = hiera('ismongo', 0)
 
   Exec {
     path => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/", "/usr/local/bin", "/opt/bin" ],
@@ -374,7 +379,7 @@ class pm::deploy::postinstall {
   }
   ->
   exec { 'postinstall':
-    command => "/bin/bash scripts/postinstall.sh ${weburi} admin.${weburi} m.${weburi}",
+    command => "/bin/bash scripts/postinstall.sh --uri ${weburi} --uri-admin admin.${weburi} --uri-mobile m.${weburi} --framework ${framework} --ftpuser ${ftpuser} --ftppasswd ${ftppasswd} --ismysql ${ismysql} --ismongo ${ismongo} > /home/modem/postinstall.log",
   }
   ->
   exec { 'touch_cron':
