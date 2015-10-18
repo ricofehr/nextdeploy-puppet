@@ -53,7 +53,8 @@ class pm::base {
         'wget',
         'postfix',
         'mailutils',
-        'ncftp'
+        'ncftp',
+        'curl'
         ]:
         ensure => installed,
   }
