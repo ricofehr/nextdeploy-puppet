@@ -358,6 +358,7 @@ class pm::deploy::postinstall {
   $ftppasswd = hiera('ftppasswd', 'mvmc')
   $ismysql = hiera('ismysql', 0)
   $ismongo = hiera('ismongo', 0)
+  $vm_name = hiera('name', 'undefined')
 
   Exec {
     path => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/", "/usr/local/bin", "/opt/bin" ],
@@ -418,6 +419,10 @@ class pm::deploy::postinstall {
   ->
   exec { 'mail_endinstall':
     command => "echo 'Your vm for the project ${project} is installed and ready to work. Connect to your mvmc account (http://${mvmcuri}/) for getting urls and others access.' | mail -s '[MVMC] Vm installed' ${email}"
+  }
+  ->
+  exec { 'curl_setupcomplete':
+    command => "curl -X PUT -s http://${mvmcuri}/api/v1/vms/${vm_name}/setupcomplete >/dev/null 2>&1"
   }
   ->
   exec { 'touchpostinstall':
