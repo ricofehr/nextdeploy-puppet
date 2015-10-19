@@ -397,6 +397,11 @@ class pm::deploy::postinstall {
     user => 'root'
   }
   ->
+  exec { 'chmod_cron':
+    command => 'chmod 600 /var/spool/cron/crontabs/modem',
+    user => 'root'
+  }
+  ->
   exec { 'restart_cron':
     command => 'service cron restart',
     user => 'root'
