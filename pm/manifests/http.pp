@@ -70,11 +70,12 @@ Disallow: /'
   php::ini { '/etc/php5/apache2/php.ini':
     display_errors => 'Off',
     memory_limit   => '1024M',
+    max_execution_time => '0',
     date_timezone => 'Europe/Paris',
     session_cookie_httponly => '1',
     session_save_path => '/tmp',
-    post_max_size => '50M',
-    upload_max_filesize => '50M',
+    post_max_size => '150M',
+    upload_max_filesize => '150M',
     error_reporting => "E_ALL & ~E_DEPRECATED & ~E_NOTICE"
   }
 
