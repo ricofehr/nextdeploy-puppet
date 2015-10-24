@@ -371,6 +371,14 @@ class pm::deploy::postinstall {
     timeout => 1800
   }
 
+  exec { 'touch_importsh':
+    command => 'touch scripts/import.sh',
+  }
+  ->
+  exec { 'chmod_importsh':
+    command => 'chmod +x scripts/import.sh',
+  }
+  ->
   exec { 'touch_postinstallsh':
     command => 'touch scripts/postinstall.sh',
   }
@@ -379,8 +387,12 @@ class pm::deploy::postinstall {
     command => 'chmod +x scripts/postinstall.sh',
   }
   ->
+  exec { 'importsh':
+    command => "/bin/bash scripts/import.sh --framework ${framework} --ftpuser ${ftpuser} --ftppasswd ${ftppasswd} --ismysql ${ismysql} --ismongo ${ismongo} > /home/modem/import.log",
+  }
+  ->
   exec { 'postinstall':
-    command => "/bin/bash scripts/postinstall.sh --uri ${weburi} --uri-admin admin.${weburi} --uri-mobile m.${weburi} --framework ${framework} --ftpuser ${ftpuser} --ftppasswd ${ftppasswd} --ismysql ${ismysql} --ismongo ${ismongo} > /home/modem/postinstall.log",
+    command => "/bin/bash scripts/postinstall.sh ${weburi} > /home/modem/postinstall.log",
   }
   ->
   exec { 'touch_cron':
