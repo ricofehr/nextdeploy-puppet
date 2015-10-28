@@ -37,6 +37,8 @@ class pm::base::apt {
 class pm::base {
   Exec { path => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/", "/usr/local/bin", "/opt/bin" ] }
 
+  $email = hiera('email', 'user@example.com')
+  
   #list of pkgs
   package { [
         'gpgv',
@@ -81,8 +83,6 @@ LC_ALL=en_US.UTF-8",
 
   #ntp class
   include ntp
-
-  $email = hiera('email')
 
   user { 'modem':
     name => 'modem',
@@ -138,5 +138,12 @@ LC_ALL=en_US.UTF-8",
       'PermitRootLogin'        => 'no',
       'Port'                   => [22],
     },
+  } ->
+  # config git username and email
+  exec { 'gitconfigemail':
+    command => "git config --global user.email ${email}",
+    unless => 'test -f /home/modem/.gitconfig',
+    require => Package['git-core'],
+    user => 'modem'
   }
 }
