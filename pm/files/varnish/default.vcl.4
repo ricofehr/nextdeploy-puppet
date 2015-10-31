@@ -77,6 +77,9 @@ sub vcl_recv {
        return(pipe) ;
   }
 
+  # return pass if options
+  if (req.method == "OPTIONS") { return(pass); }
+
   if(req.url ~ "^/status_ok") { return(pipe); }
   include "auth.vcl";
   if(req.url ~ "/pm_tools/") { return(pipe); }
@@ -323,6 +326,13 @@ sub vcl_miss {
 # Handle the HTTP request coming from our backend
 sub vcl_backend_response {
 # Called after the response headers has been successfully retrieved from the backend.
+
+  # rules for cross-domain requests
+  set beresp.http.Access-Control-Allow-Origin = req.http.origin ;
+  set beresp.http.Access-Control-Allow-Methods = "GET,PUT,POST,DELETE,PATCH,OPTIONS" ;
+  set beresp.http.Access-Control-Max-Age = "1";
+  set beresp.http.Access-Control-Allow-Credentials = "true";
+  set beresp.http.Access-Control-Allow-Headers = "accept, authorization";
 
   # Pause ESI request and remove Surrogate-Control header
   if (beresp.http.Surrogate-Control ~ "ESI/1.0") {
