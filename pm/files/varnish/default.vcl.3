@@ -49,18 +49,25 @@ sub vcl_recv {
 
   if (req.request != "GET" &&
       req.request != "POST" &&
-      req.request != "HEAD") {
+      req.request != "OPTIONS" &&
+      req.request != "HEAD" && 
+      req.request != "DELETE" &&
+      req.request != "PATCH" &&
+      req.request != "PUT") {
         error 405 "Not allowed";
   }
 
   # bypass fb and googleplus
-  if(req.http.User-Agent ~ "^facebook" || req.http.User-Agent ~ "Firefox/6.0 Google \(\+https://developers") {
+  if (req.http.User-Agent ~ "^facebook" || req.http.User-Agent ~ "Firefox/6.0 Google \(\+https://developers") {
        return(pipe) ;
   }
 
-  if(req.url ~ "^/status_ok") { return(pipe); }
+  # return pass if OPTIONS
+  if (req.request == "OPTIONS") { return(pass); }
+
+  if (req.url ~ "^/status_ok") { return(pipe); }
   include "auth.vcl";
-  if(req.url ~ "/pm_tools/") { return(pipe); }
+  if (req.url ~ "/pm_tools/") { return(pipe); }
 
   # Tout ce qui n'est pas GET ou HEAD ne sera pas mis en cache
   # On utilise la directive PASS et non PIPE
@@ -187,6 +194,13 @@ sub vcl_miss {
 # ================================
 sub vcl_fetch {
  set beresp.grace = 30s;
+
+  # rules for cross-domain requests
+  set beresp.http.Access-Control-Allow-Origin = req.http.origin ;
+  set beresp.http.Access-Control-Allow-Methods = "GET,PUT,POST,DELETE,PATCH,OPTIONS" ;
+  set beresp.http.Access-Control-Max-Age = "1";
+  set beresp.http.Access-Control-Allow-Credentials = "true";
+  set beresp.http.Access-Control-Allow-Headers = "accept, authorization";
 
   # Si l'objet ne peut etre mis en cache
   # http code != 200, 203, 300, 301, 302, 404 ou 410
