@@ -19,14 +19,10 @@ rc=0;
 
 echo "########";
     export LANG=fr_FR.UTF-8
-    echo "# Updating \"$1server\"";
-    cd $1/server
-    /usr/bin/php composer.phar install -n --prefer-source
+    echo "# Updating \"${1%/}server\"";
+    cd ${1%/}server
+    HOME=/var/www /usr/bin/php composer.phar install -n --prefer-source
 
-#if [[ -e bower.json ]]; then
-#  source ~/nvm/nvm.sh && nvm use v0.10.29
-#  bower install
-#fi
     rc=$?;
 echo "########";
 
