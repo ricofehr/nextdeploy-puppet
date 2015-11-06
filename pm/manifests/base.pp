@@ -142,8 +142,10 @@ LC_ALL=en_US.UTF-8",
   # config git username and email
   exec { 'gitconfigemail':
     command => "git config --global user.email ${email}",
-    unless => 'test -f /home/modem/.gitconfig',
+    environment => ["HOME=/home/modem"],
+    creates => '/home/modem/.gitconfig',
     require => Package['git-core'],
-    user => 'modem'
+    user => 'modem',
+    cwd => '/home/modem'
   }
 }
