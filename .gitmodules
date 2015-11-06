@@ -55,9 +55,6 @@
 [submodule "ssh"]
 	path = ssh
 	url = https://github.com/saz/puppet-ssh
-[submodule "ossec"]
-	path = ossec
-	url = https://github.com/djjudas21/puppet-ossec
 [submodule "collectd"]
 	path = collectd
 	url = https://github.com/puppet-community/puppet-collectd
