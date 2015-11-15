@@ -388,7 +388,7 @@ class pm::deploy::postinstall {
   }
   ->
   exec { 'importsh':
-    command => "/bin/bash scripts/import.sh --framework ${framework} --ftpuser ${ftpuser} --ftppasswd ${ftppasswd} --ismysql ${ismysql} --ismongo ${ismongo} > /home/modem/import.log",
+    command => "/bin/bash scripts/import.sh --uri ${weburi} --framework ${framework} --ftpuser ${ftpuser} --ftppasswd ${ftppasswd} --ismysql ${ismysql} --ismongo ${ismongo} > /home/modem/import.log",
   }
   ->
   exec { 'postinstall':
