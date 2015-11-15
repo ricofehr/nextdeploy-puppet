@@ -75,5 +75,6 @@ class pm::varnish {
     subscribe  => File['/etc/default/varnishncsa'],
     require    => Package['varnish']
   }
-
+  ->
+  class { 'pm::monitor::collect::varnish': }
 }

@@ -25,6 +25,9 @@ class pm::sql {
   exec { 'touchsqlrestart':
     command => 'touch /root/.sqlrestart'
   }
+  ->
+  class { 'pm::monitor::collect::mysql': }
 
   create_resources ('mysql::db', hiera('mysql_db', []))
+
 }

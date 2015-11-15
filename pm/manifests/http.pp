@@ -47,6 +47,12 @@ class pm::http {
     content => ''
   }
   ->
+  # add status setting
+  file { '/etc/apache2/mods-enabled/status.conf':
+    ensure => 'link',
+    target => '/etc/apache2/mods-available/status.conf'
+  }
+  ->
   # alias for a disallow-all robots.txt
   file { '/var/www/robots.txt':
     owner => 'www-data',
@@ -126,4 +132,6 @@ Disallow: /'
       source => 'puppet:///modules/pm/pm_tools'
     }
   }
+
+  class { 'pm::monitor::collect::apache': }
 }
