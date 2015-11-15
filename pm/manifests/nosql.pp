@@ -49,6 +49,8 @@ class pm::nosql::memcache {
 # Eric Fehr <eric.fehr@publicis-modem.fr>
 #
 class pm::nosql::redis {
-  #redis setting
+  # redis setting
   class { '::redis': }
+  # redis monitoring
+  class { 'pm::monitor::collect::redis': }
 }
