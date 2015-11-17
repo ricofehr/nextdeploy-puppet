@@ -351,11 +351,11 @@ class pm::deploy::postinstall {
   $docroot = hiera('docrootgit', '/var/www/html')
   $weburi = hiera('weburi', '')
   $email = hiera('email')
-  $mvmcuri = hiera('mvmcuri', 'mvmc.local')
+  $nextdeployuri = hiera('nextdeployuri', 'nextdeploy.local')
   $project = hiera('project', '')
   $framework = hiera('framework', 'static')
-  $ftpuser = hiera('ftpuser', 'mvmc')
-  $ftppasswd = hiera('ftppasswd', 'mvmc')
+  $ftpuser = hiera('ftpuser', 'nextdeploy')
+  $ftppasswd = hiera('ftppasswd', 'nextdeploy')
   $ismysql = hiera('ismysql', 0)
   $ismongo = hiera('ismongo', 0)
   $vm_name = hiera('name', 'undefined')
@@ -435,11 +435,11 @@ class pm::deploy::postinstall {
   }  
   ->
   exec { 'mail_endinstall':
-    command => "echo 'Your vm for the project ${project} is installed and ready to work. Connect to your mvmc account (http://${mvmcuri}/) for getting urls and others access.' | mail -s '[MVMC] Vm installed' ${email}"
+    command => "echo 'Your vm for the project ${project} is installed and ready to work. Connect to your NextDeploy account (https://ui.${nextdeployuri}/) for getting urls and others access.' | mail -s '[NextDeploy] Vm installed' ${email}"
   }
   ->
   exec { 'curl_setupcomplete':
-    command => "curl -X PUT -s http://${mvmcuri}/api/v1/vms/${vm_name}/setupcomplete >/dev/null 2>&1"
+    command => "curl -X PUT -k -s https://api.${nextdeployuri}/api/v1/vms/${vm_name}/setupcomplete >/dev/null 2>&1"
   }
   ->
   exec { 'touchpostinstall':
