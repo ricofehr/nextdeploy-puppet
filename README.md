@@ -1,12 +1,12 @@
-# mvmc-puppet
-The puppet repository who manage the virtual machines installation for the [mvmc project](https://github.com/ricofehr/mvmc) users 
+# nextdeploy-puppet
+The puppet repository who manage the virtual machines installation for the [nextdeploy project](https://github.com/ricofehr/nextdeploy) users 
 
 ## Submodules and Clone
 The puppet modules of the community are included in the project in the form of Submodules git.
 
 To retrieve, use this clone cmd.
 ```
-git clone --recursive git@github.com:ricofehr/mvmc-puppet
+git clone --recursive git@github.com:ricofehr/nextdeploy-puppet
 ```
 
 If the clone has already been done, execute this command.
