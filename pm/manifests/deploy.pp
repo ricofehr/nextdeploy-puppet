@@ -21,18 +21,15 @@ class pm::deploy::vhost {
   exec { 'nohostvalidation':
     command => 'echo "StrictHostKeyChecking no" >> /etc/ssh/ssh_config',
     user => 'root'
-  }
-  ->
+  } ->
   exec { 'mkdir_docroot':
     command => "mkdir -p ${docroot}",
     user => 'root'
-  }
-  ->
+  } ->
   exec { 'chown_varwww':
     command => "chown -R modem:www-data ${docroot}",
     user => 'root'
-  }
-  ->
+  } ->
   exec { 'gitclone':
     command => "git clone -b ${branch} ${gitpath} ${docroot}",
     user => 'modem',
@@ -40,15 +37,13 @@ class pm::deploy::vhost {
     cwd => '/home/modem',
     unless => "test -d ${docroot}/.git",
     require => [ Package['git-core'], File['/home/modem/.ssh/id_rsa'] ]
-  }
-  ->
+  } ->
   exec { 'gitreset':
     command => "git reset --hard ${commit}",
     user => 'modem',
     cwd => "${docroot}",
     group => 'www-data'
-  }
-  ->
+  } ->
   exec { 'touchdeploygit':
     command => 'touch /home/modem/.deploygit',
     user => 'modem'
@@ -86,58 +81,58 @@ class pm::deploy::symfony2 {
     owner             =>  modem,
     group             =>  www-data,
     mode              =>  '0770'
-  }
-  ->
+  } ->
+
   # Ensure the logs/cache directory exists with the right permissions
   file { "${docroot}/server/app/cache":
     ensure            =>  directory,
     owner             =>  modem,
     group             =>  www-data,
     mode              =>  '0770'
-  }
-  ->
+  } ->
+
   exec { 'composerdl':
     command => 'curl -sS https://getcomposer.org/installer | php',
     unless => 'test -f composer.phar'
-  }
-  ->
+  } ->
+
   exec { 'composer':
     command => 'php composer.phar install -n --prefer-source'
-  }
-  ->
+  } ->
+
   exec { 'parameters_dbname':
     command => 'sed -i "s,database_name:.*$,database_name: s_bdd," app/config/parameters.yml'
-  }
-  ->
+  } ->
+
   exec { 'parameters_dbuser':
     command => 'sed -i "s,database_user:.*$,database_user: s_bdd," app/config/parameters.yml'
-  }
-  ->
+  } ->
+
   exec { 'parameters_dbpasswd':
     command => 'sed -i "s,database_password:.*$,database_password: s_bdd," app/config/parameters.yml'
-  }
-  ->
+  } ->
+
   exec { 'parameters_mongoserver':
     command => 'sed -i "s,mongodb_server:.*$,mongodb_server: mongodb://localhost:27017," app/config/parameters.yml'
-  }
-  ->
+  } ->
+
   exec { 'parameters_mongoname':
     command => 'sed -i "s,mongodb_default_name:.*$,mongodb_default_name: mongodb," app/config/parameters.yml'
-  }
-  ->
+  } ->
+
   exec { 'schema':
     command => 'php app/console doctrine:schema:create',
     onlyif => 'ps aux | grep mysqld | grep -v grep'
-  }
-  ->
+  } ->
+
   exec { 'assets':
     command => 'php app/console assets:install --symlink'
-  }
-  ->
+  } ->
+
   exec { 'assetic':
     command => 'php app/console assetic:dump'
-  }
-  ->
+  } ->
+
   exec { 'touchdeploy':
     command => 'touch /home/modem/.deploysf2'
   }
@@ -197,22 +192,27 @@ class pm::deploy::nodejs {
     command => 'npm install',
     onlyif => 'test -f package.json'
   } ->
+
   exec { 'bowerinstall':
     command => 'bower install',
     onlyif => 'test -f bower.json'
   } ->
+
   exec { 'gruntbuild':
     command => 'grunt build',
     onlyif => 'test -f Gruntfile.js'
   } ->
+
   exec { 'gulpbuild':
     command => 'gulp build',
     onlyif => 'test -f gulpfile.js'
   } ->
+
   exec { 'pm2start':
     command => 'pm2 start -f app.js',
     onlyif => 'test -f app.js'
   } ->
+
   exec { 'touchdeploynodejs':
     command => 'touch /home/modem/.deploynodejs'
   }
@@ -249,22 +249,49 @@ class pm::deploy::drupal {
     require => Package['php-pear']
   }
   ->
-  exec {'pear-drushchannel':
-    command => 'pear channel-discover pear.drush.org',
-    user => 'root',
-    unless => 'pear list-channels | grep pear.drush.org'
-  }
-  ->
-  exec {'drush-install':
-    command => 'pear install -f drush/drush',
-    user => 'root',
-    onlyif => 'test ! -f /usr/bin/drush',
-  }
-  ->
+
+  exec { 'getdrush':
+    command => 'wget https://github.com/drush-ops/drush/releases/download/8.0.0-rc4/drush.phar',
+    creates => '/usr/local/bin/drush',
+    cwd => '/tmp'
+  } ->
+
+  exec { 'coredrush':
+    command => 'php drush.phar core-status',
+    creates => '/usr/local/bin/drush',
+    cwd => '/tmp'
+  } ->
+
+  exec { 'chmodrush':
+    command => 'chmod +x drush.phar',
+    creates => '/usr/local/bin/drush',
+    cwd => '/tmp'
+  } ->
+
+  exec { 'mvdrush':
+    command => 'mv drush.phar /usr/local/bin/drush',
+    creates => '/usr/local/bin/drush',
+    cwd => '/tmp'
+  } ->
+
+  #exec {'pear-drushchannel':
+  #  command => 'pear channel-discover pear.drush.org',
+  #  user => 'root',
+  #  unless => 'pear list-channels | grep pear.drush.org'
+  #}
+  #->
+  #exec {'drush-install':
+  #  command => 'pear install -f drush/drush',
+  #  user => 'root',
+  #  onlyif => 'test ! -f /usr/bin/drush',
+  #}
+  #->
+
   exec {'site-install':
     command => "drush -y site-install --locale=en --db-url=mysql://s_bdd:s_bdd@localhost:3306/s_bdd --account-pass=modem --site-name=vm --account-mail=${email} --site-mail=${email} standard"
   }
   ->
+
   exec { 'touchdeploy':
     command => 'touch /home/modem/.deploydrupal'
   }
@@ -300,38 +327,38 @@ class pm::deploy::wordpress {
   exec { 'wp-cli1':
     command => 'curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar',
     cwd => '/tmp'
-  }
-  ->
+  } ->
+
   exec { 'wp-cli2':
     command => 'chmod +x /tmp/wp-cli.phar'
-  }
-  ->
+  } ->
+
   exec { 'wp-cli3':
     command => 'mv /tmp/wp-cli.phar /usr/local/bin/wp',
     user => 'root'
-  }
-  ->
+  } ->
+
   exec { 'dlwp':
     command => 'wp core download', # --locale=fr_FR',
     unless => 'test -d wp-admin'
-  }
-  ->
+  } ->
+
   exec { 'configwp':
     command => 'wp core config --dbname=s_bdd --dbuser=s_bdd --dbpass=s_bdd',
     unless => 'test -f wp-config.php'
-  }
-  ->
+  } ->
+
   exec { 'gitresetwp':
     command => "git reset --hard ${commit}",
     user => 'modem',
     cwd => "${docroot}",
     group => 'www-data'
-  }
-  ->
+  } ->
+
   exec { 'installbdd':
     command => "wp core install --url=${weburi} --title=vm --admin_user=modem --admin_password=modem --admin_email=${email}"
-  }
-  ->
+  } ->
+
   exec { 'touchdeploy':
     command => 'touch /home/modem/.deploywp'
   }
@@ -373,75 +400,75 @@ class pm::deploy::postinstall {
 
   exec { 'touch_importsh':
     command => 'touch scripts/import.sh',
-  }
-  ->
+  } ->
+
   exec { 'chmod_importsh':
     command => 'chmod +x scripts/import.sh',
-  }
-  ->
+  } ->
+
   exec { 'touch_postinstallsh':
     command => 'touch scripts/postinstall.sh',
-  }
-  ->
+  } ->
+
   exec { 'chmod_postinstallsh':
     command => 'chmod +x scripts/postinstall.sh',
-  }
-  ->
+  } ->
+
   exec { 'importsh':
     command => "/bin/bash scripts/import.sh --uri ${weburi} --framework ${framework} --ftpuser ${ftpuser} --ftppasswd ${ftppasswd} --ismysql ${ismysql} --ismongo ${ismongo} > /home/modem/import.log",
-  }
-  ->
+  } ->
+
   exec { 'postinstall':
     command => "/bin/bash scripts/postinstall.sh ${weburi} > /home/modem/postinstall.log",
-  }
-  ->
+  } ->
+
   exec { 'touch_cron':
     command => 'touch scripts/crontab',
-  }
-  ->
+  } ->
+
   exec { 'copy_cron':
     command => 'cp scripts/crontab /var/spool/cron/crontabs/modem',
     user => 'root'
-  }
-  ->
+  } ->
+
   exec { 'chown_cron':
     command => 'chown modem: /var/spool/cron/crontabs/modem',
     user => 'root'
-  }
-  ->
+  } ->
+
   exec { 'chmod_cron':
     command => 'chmod 600 /var/spool/cron/crontabs/modem',
     user => 'root'
-  }
-  ->
+  } ->
+
   exec { 'restart_cron':
     command => 'service cron restart',
     user => 'root'
-  }
-  ->
+  } ->
+
   exec { 'restartvarnish_postinstall':
     command => 'service varnish restart',
     user => 'root'
-  }
-  ->
+  } ->
+
   exec { 'touchstatusok':
     command => 'touch /var/www/status_ok',
     user => 'root'
-  }
-  ->
+  } ->
+
   exec { 'chownstatusok':
     command => 'chown modem: /var/www/status_ok',
     user => 'root'
-  }  
-  ->
+  } ->
+
   exec { 'mail_endinstall':
     command => "echo 'Your vm for the project ${project} is installed and ready to work. Connect to your NextDeploy account (https://ui.${nextdeployuri}/) for getting urls and others access.' | mail -s '[NextDeploy] Vm installed' ${email}"
-  }
-  ->
+  } ->
+
   exec { 'curl_setupcomplete':
     command => "curl -X PUT -k -s https://api.${nextdeployuri}/api/v1/vms/${vm_name}/setupcomplete >/dev/null 2>&1"
-  }
-  ->
+  } ->
+
   exec { 'touchpostinstall':
     command => 'touch /home/modem/.postinstall'
   }
