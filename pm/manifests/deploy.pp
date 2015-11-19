@@ -234,12 +234,6 @@ class pm::deploy::drupal {
 
   Exec {
     path => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/", "/usr/local/bin", "/opt/bin" ],
-    user => 'modem',
-    group => 'www-data',
-    unless => 'test -f /home/modem/.deploydrupal',
-    cwd => "${docroot}/server",
-    environment => ["HOME=/home/modem"],
-    timeout => 1800,
     require => [ Service['varnish'], Exec['touchdeploygit'] ]
   }
 
@@ -253,13 +247,18 @@ class pm::deploy::drupal {
   exec { 'getdrush':
     command => 'wget https://github.com/drush-ops/drush/releases/download/8.0.0-rc4/drush.phar',
     creates => '/usr/local/bin/drush',
+    user => 'modem',
+    group => 'www-data',
     cwd => '/tmp'
   } ->
 
   exec { 'coredrush':
     command => 'php drush.phar core-status',
     creates => '/usr/local/bin/drush',
-    cwd => '/tmp'
+    cwd => '/tmp',
+    user => 'modem',
+    group => 'www-data',
+    environment => ["HOME=/home/modem"]
   } ->
 
   exec { 'chmodrush':
@@ -271,29 +270,40 @@ class pm::deploy::drupal {
   exec { 'mvdrush':
     command => 'mv drush.phar /usr/local/bin/drush',
     creates => '/usr/local/bin/drush',
+    user => 'root',
     cwd => '/tmp'
   } ->
 
-  #exec {'pear-drushchannel':
-  #  command => 'pear channel-discover pear.drush.org',
-  #  user => 'root',
-  #  unless => 'pear list-channels | grep pear.drush.org'
-  #}
-  #->
-  #exec {'drush-install':
-  #  command => 'pear install -f drush/drush',
-  #  user => 'root',
-  #  onlyif => 'test ! -f /usr/bin/drush',
-  #}
-  #->
-
+  exec { 'writedefaults':
+    command => 'chmod +w sites/default',
+    user => 'root',
+    cwd => "${docroot}/server",
+    creates => '/home/modem/.deploydrupal'
+  } ->
+  
   exec {'site-install':
-    command => "drush -y site-install --locale=en --db-url=mysql://s_bdd:s_bdd@localhost:3306/s_bdd --account-pass=modem --site-name=vm --account-mail=${email} --site-mail=${email} standard"
+    command => "/usr/local/bin/drush -y site-install --locale=en --db-url=mysql://s_bdd:s_bdd@localhost:3306/s_bdd --account-pass=modem --site-name=vm --account-mail=${email} --site-mail=${email} standard >/dev/null 2>&1",
+    cwd => "${docroot}/server",
+    user => 'modem',
+    group => 'www-data',
+    environment => ["HOME=/home/modem", "USER=modem", "LC_ALL=en_US.UTF-8"],
+    timeout => 1800,
+    creates => '/home/modem/.deploydrupal'
   }
   ->
 
+  exec { 'readdefaults':
+    command => 'chmod -w sites/default',
+    user => 'root',
+    cwd => "${docroot}/server",
+    creates => '/home/modem/.deploydrupal'
+  } ->
+
   exec { 'touchdeploy':
-    command => 'touch /home/modem/.deploydrupal'
+    command => 'touch /home/modem/.deploydrupal',
+    user => 'modem',
+    group => 'www-data',
+    creates => '/home/modem/.deploydrupal'
   }
 }
 
