@@ -86,9 +86,9 @@ Disallow: /'
   }
 
   php::ini { '/etc/php5/cli/php.ini':
-    display_errors => 'Off',
     memory_limit   => '1024M',
     date_timezone => 'Europe/Paris',
+    max_execution_time => '0'
   }
 
   class { 'php::cli':}
