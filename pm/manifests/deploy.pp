@@ -231,34 +231,21 @@ class pm::deploy::nodejs {
 class pm::deploy::drupal {
   $docroot = hiera('docrootgit', '/var/www/html')
   $email = hiera('email', 'test@yopmail.com')
+  $projectname = hiera('project', 'currentproject')
+  $username = hiera('httpuser', 'admin')
+  $adminpass = hiera('httppasswd', 'nextdeploy')
 
   Exec {
     path => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/", "/usr/local/bin", "/opt/bin" ],
     require => [ Service['varnish'], Exec['touchdeploygit'] ]
   }
 
-  exec {'pear-consoletable':
-    command => 'pear install -f Console_Table',
-    user => 'root',
-    require => Package['php-pear']
-  }
-  ->
-
   exec { 'getdrush':
-    command => 'wget https://github.com/drush-ops/drush/releases/download/8.0.0-rc4/drush.phar',
+    command => 'wget http://files.drush.org/drush.phar',
     creates => '/usr/local/bin/drush',
     user => 'modem',
     group => 'www-data',
     cwd => '/tmp'
-  } ->
-
-  exec { 'coredrush':
-    command => 'php drush.phar core-status',
-    creates => '/usr/local/bin/drush',
-    cwd => '/tmp',
-    user => 'modem',
-    group => 'www-data',
-    environment => ["HOME=/home/modem"]
   } ->
 
   exec { 'chmodrush':
@@ -274,28 +261,23 @@ class pm::deploy::drupal {
     cwd => '/tmp'
   } ->
 
-  exec { 'writedefaults':
-    command => 'chmod +w sites/default',
-    user => 'root',
-    cwd => "${docroot}/server",
-    creates => '/home/modem/.deploydrupal'
-  } ->
-  
-  exec {'site-install':
-    command => "/usr/local/bin/drush -y site-install --locale=en --db-url=mysql://s_bdd:s_bdd@localhost:3306/s_bdd --account-pass=modem --site-name=vm --account-mail=${email} --site-mail=${email} standard >/dev/null 2>&1",
+  exec {'drush-init':
+    command => "/usr/local/bin/drush init >/dev/null 2>&1",
     cwd => "${docroot}/server",
     user => 'modem',
     group => 'www-data',
     environment => ["HOME=/home/modem", "USER=modem", "LC_ALL=en_US.UTF-8"],
-    timeout => 1800,
-    creates => '/home/modem/.deploydrupal'
-  }
-  ->
-
-  exec { 'readdefaults':
-    command => 'chmod -w sites/default',
-    user => 'root',
+    timeout => 100,
+    creates => '/home/modem/.drush/drushrc.php'
+  } ->
+  
+  exec {'site-install':
+    command => "/usr/local/bin/drush -y site-install --db-url=mysql://s_bdd:s_bdd@localhost:3306/s_bdd --account-name=${username} --account-pass=${adminpass} --site-name=${projectname} --account-mail=${email} --site-mail=${email} standard >/dev/null 2>&1",
     cwd => "${docroot}/server",
+    user => 'modem',
+    group => 'www-data',
+    environment => ["HOME=/home/modem", "USER=modem", "LC_ALL=en_US.UTF-8"],
+    timeout => 3600,
     creates => '/home/modem/.deploydrupal'
   } ->
 
@@ -322,6 +304,8 @@ class pm::deploy::wordpress {
   $email = hiera('email', 'test@yopmail.com')
   $weburi = hiera('weburi', '')
   $commit = hiera('commit', 'HEAD')
+  $username = hiera('httpuser', 'admin')
+  $adminpass = hiera('httppasswd', 'nextdeploy')
 
   Exec {
     path => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/", "/usr/local/bin", "/opt/bin" ],
@@ -366,7 +350,7 @@ class pm::deploy::wordpress {
   } ->
 
   exec { 'installbdd':
-    command => "wp core install --url=${weburi} --title=vm --admin_user=modem --admin_password=modem --admin_email=${email}"
+    command => "wp core install --url=${weburi} --title=vm --admin_user=${username} --admin_password=${adminpass} --admin_email=${email}"
   } ->
 
   exec { 'touchdeploy':
