@@ -237,9 +237,14 @@ class pm::deploy::drupal {
 
   Exec {
     path => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/", "/usr/local/bin", "/opt/bin" ],
-    require => [ Service['varnish'], Exec['touchdeploygit'], Exec['disableopcache'] ]
+    require => [ Service['varnish'], Exec['touchdeploygit'] ]
   }
 
+  exec {'resetopcache':
+    command => "php -r 'opcache_reset();'",
+    creates => '/home/modem/.deploydrupal'
+  } ->
+  
   exec { 'getdrush':
     command => 'wget http://files.drush.org/drush.phar',
     creates => '/usr/local/bin/drush',
