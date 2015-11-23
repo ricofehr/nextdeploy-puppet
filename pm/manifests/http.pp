@@ -67,12 +67,6 @@ Disallow: /'
   $kvhost = keys($vhost_params)
   class {'::apache::mod::php':}
 
-  php::ini { '/etc/php.ini':
-    display_errors => 'Off',
-    memory_limit   => '1024M',
-    date_timezone => 'Europe/Paris',
-  }
-
   php::ini { '/etc/php5/apache2/php.ini':
     display_errors => 'Off',
     memory_limit   => '1024M',
@@ -85,16 +79,17 @@ Disallow: /'
     error_reporting => "E_ALL & ~E_DEPRECATED & ~E_NOTICE"
   }
 
-  php::ini { '/etc/php5/cli/php.ini':
-    memory_limit   => '1024M',
-    date_timezone => 'Europe/Paris',
-    max_execution_time => '0'
-  }
-
   class { 'php::cli':}
   ->
   package { [ 'php-pear', 'php5-dev']:
     ensure => installed,
+  }
+
+  php::ini { '/etc/php5/cli/php.ini':
+    memory_limit   => '-1',
+    date_timezone => 'Europe/Paris',
+    max_execution_time => '0',
+    display_errors => 'On'
   }
 
   #install mongo extension only if mongo is part of the project
@@ -108,16 +103,16 @@ Disallow: /'
       require => [ Package['php-pear'], Package['php5-dev'] ]
     }
     ->
-    exec { "mongo.ini":
-      command => "/bin/echo extension=mongo.so > /etc/php5/apache2/conf.d/20-mongo.ini",
-      user => "root",
-      environment => ["HOME=/root"],
+
+    file { "/etc/php5/apache2/conf.d/20-mongo.ini":
+      content => "extension=mongo.so",
+      owner => "root"
     }
     ->
-    exec { "mongo.inicli":
-      command => "/bin/echo extension=mongo.so > /etc/php5/cli/conf.d/20-mongo.ini",
-      user => "root",
-      environment => ["HOME=/root"],
+
+    exec { "/etc/php5/cli/conf.d/20-mongo.ini":
+      content => "extension=mongo.so",
+      owner => "root"
     }
   }
 
