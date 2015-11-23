@@ -237,7 +237,7 @@ class pm::deploy::drupal {
 
   Exec {
     path => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/", "/usr/local/bin", "/opt/bin" ],
-    require => [ Service['varnish'], Exec['touchdeploygit'] ]
+    require => [ Service['varnish'], Exec['touchdeploygit'], Exec['disableopcache'] ]
   }
 
   exec { 'getdrush':
@@ -266,18 +266,28 @@ class pm::deploy::drupal {
     cwd => "${docroot}/server",
     user => 'modem',
     group => 'www-data',
-    environment => ["HOME=/home/modem", "USER=modem", "LC_ALL=en_US.UTF-8"],
+    environment => ["HOME=/home/modem", "USER=modem", "LC_ALL=en_US.UTF-8", "LANG=en_US.UTF-8", "LANGUAGE=en_US.UTF-8", "SHELL=/bin/bash", "TERM=xterm"],
     timeout => 100,
     creates => '/home/modem/.drush/drushrc.php'
   } ->
   
   exec {'site-install':
-    command => "/usr/local/bin/drush -y site-install --db-url=mysql://s_bdd:s_bdd@localhost:3306/s_bdd --account-name=${username} --account-pass=${adminpass} --site-name=${projectname} --account-mail=${email} --site-mail=${email} standard >/dev/null 2>&1",
+    command => "/usr/local/bin/drush -y site-install --db-url=mysql://s_bdd:s_bdd@localhost:3306/s_bdd --locale=en --account-name=${username} --account-pass=${adminpass} --site-name=${projectname} --account-mail=${email} --site-mail=${email} standard >/dev/null 2>&1",
     cwd => "${docroot}/server",
     user => 'modem',
     group => 'www-data',
-    environment => ["HOME=/home/modem", "USER=modem", "LC_ALL=en_US.UTF-8"],
+    environment => ["HOME=/home/modem", "USER=modem", "LC_ALL=en_US.UTF-8", "LANG=en_US.UTF-8", "LANGUAGE=en_US.UTF-8", "SHELL=/bin/bash", "TERM=xterm"],
     timeout => 3600,
+    creates => '/home/modem/.deploydrupal'
+  } ->
+
+  exec {'drush-cr':
+    command => "/usr/local/bin/drush cr >/dev/null 2>&1",
+    cwd => "${docroot}/server",
+    user => 'modem',
+    group => 'www-data',
+    environment => ["HOME=/home/modem", "USER=modem", "LC_ALL=en_US.UTF-8", "LANG=en_US.UTF-8", "LANGUAGE=en_US.UTF-8", "SHELL=/bin/bash", "TERM=xterm"],
+    timeout => 100,
     creates => '/home/modem/.deploydrupal'
   } ->
 
