@@ -152,9 +152,9 @@ class pm::monitor::collect::redis {
 class pm::monitor::collect::mysql {
   collectd::plugin::mysql::database { 's_bdd':
     host        => 'localhost',
-    username    => 's_bdd',
-    password    => 's_bdd',
+    username    => 'root',
+    password    => '',
     port        => '3306',
-    masterstats => true,
+    masterstats => false,
   }
 }
