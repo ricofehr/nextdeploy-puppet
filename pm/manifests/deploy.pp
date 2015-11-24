@@ -232,8 +232,10 @@ class pm::deploy::drupal {
   $docroot = hiera('docrootgit', '/var/www/html')
   $email = hiera('email', 'test@yopmail.com')
   $projectname = hiera('project', 'currentproject')
+  $framework = hiera('framework', 'Drupal8')
   $username = hiera('httpuser', 'admin')
   $adminpass = hiera('httppasswd', 'nextdeploy')
+  $iscache = hiera('iscache', '0')
 
   Exec {
     path => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/", "/usr/local/bin", "/opt/bin" ],
@@ -242,6 +244,11 @@ class pm::deploy::drupal {
 
   exec {'resetopcache':
     command => "php -r 'opcache_reset();'",
+    creates => '/home/modem/.deploydrupal'
+  } ->
+
+  exec {'sleepopcache':
+    command => "sleep 30",
     creates => '/home/modem/.deploydrupal'
   } ->
   
@@ -301,6 +308,40 @@ class pm::deploy::drupal {
     user => 'modem',
     group => 'www-data',
     creates => '/home/modem/.deploydrupal'
+  }
+
+  if $iscache == "yes" {
+    case $framework {
+      'Drupal6': {
+        exec { 'memcachesettingsd6':
+          command => 'echo  "$conf[\'cache_inc\'] = \'./sites/all/modules/memcache/memcache.inc\';$conf[\’memcache_bins\’] = array(\’cache\’ => \’default\’, \’cache_form\’ => \’database\’);" >> sites/default/settings.php',
+          cwd => "${docroot}/server",
+          user => 'root',
+          require => Exec['site-install'],
+          before => Exec['drush-cr']
+        }
+      }
+      'Drupal7': {
+        exec { 'memcachesettingsd7':
+          command => 'echo  "$conf[\'cache_backends\'][] = \‘./sites/all/modules/memcache/memcache.inc\';$conf[\'cache_default_class\'] = \'MemCacheDrupal\’;$conf[\'cache_class_cache_form\'] = \'DrupalDatabaseCache\';" >> sites/default/settings.php',
+          cwd => "${docroot}/server",
+          user => 'root',
+          require => Exec['site-install'],
+          before => Exec['drush-cr']
+        }
+      }
+      'Drupal8': {
+        exec { 'memcachesettingsd8':
+          command => 'drush -y pm-enable memcache >/dev/null 2>&1',
+          cwd => "${docroot}/server",
+          user => 'modem',
+          group => 'www-data',
+          environment => ["HOME=/home/modem", "USER=modem", "LC_ALL=en_US.UTF-8", "LANG=en_US.UTF-8", "LANGUAGE=en_US.UTF-8", "SHELL=/bin/bash", "TERM=xterm"],
+          require => Exec['site-install'],
+          before => Exec['drush-cr']
+        }
+      }
+    }
   }
 }
 
