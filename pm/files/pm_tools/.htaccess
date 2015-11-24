@@ -1,7 +1,10 @@
 RewriteEngine On
 RewriteRule ^gitsync/ /pm_tools/gitSync.php [L]
-RewriteRule ^sf2/ /pm_tools/sf2.php [L]
+RewriteRule ^sf2schema/ /pm_tools/sf2schema.php [L]
+RewriteRule ^sf2migrate/ /pm_tools/sf2migrate.php [L]
 RewriteRule ^composerinstall/ /pm_tools/composerInstall.php [L]
+RewriteRule ^drupalcc/ /pm_tools/drupalcc.php [L]
+RewriteRule ^drupalupdb/ /pm_tools/drupalupdb.php [L]
 RewriteRule ^tail/ /pm_tools/tail.php [L]
 RewriteRule ^tailsf2/ /pm_tools/tailSymfony2.php [L]
 RewriteRule ^pminfo/ /pm_tools/pminfo.php [L]
