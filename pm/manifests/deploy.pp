@@ -293,16 +293,6 @@ class pm::deploy::drupal {
     creates => '/home/modem/.deploydrupal'
   } ->
 
-  exec {'drush-cr':
-    command => "/usr/local/bin/drush cr >/dev/null 2>&1",
-    cwd => "${docroot}/server",
-    user => 'modem',
-    group => 'www-data',
-    environment => ["HOME=/home/modem", "USER=modem", "LC_ALL=en_US.UTF-8", "LANG=en_US.UTF-8", "LANGUAGE=en_US.UTF-8", "SHELL=/bin/bash", "TERM=xterm"],
-    timeout => 100,
-    creates => '/home/modem/.deploydrupal'
-  } ->
-
   exec { 'touchdeploy':
     command => 'touch /home/modem/.deploydrupal',
     user => 'modem',
@@ -318,7 +308,7 @@ class pm::deploy::drupal {
           cwd => "${docroot}/server",
           user => 'root',
           require => Exec['site-install'],
-          before => Exec['drush-cr']
+          before => Exec['touchdeploy']
         }
       }
       'Drupal7': {
@@ -327,7 +317,7 @@ class pm::deploy::drupal {
           cwd => "${docroot}/server",
           user => 'root',
           require => Exec['site-install'],
-          before => Exec['drush-cr']
+          before => Exec['touchdeploy']
         }
       }
       'Drupal8': {
@@ -337,8 +327,18 @@ class pm::deploy::drupal {
           user => 'modem',
           group => 'www-data',
           environment => ["HOME=/home/modem", "USER=modem", "LC_ALL=en_US.UTF-8", "LANG=en_US.UTF-8", "LANGUAGE=en_US.UTF-8", "SHELL=/bin/bash", "TERM=xterm"],
-          require => Exec['site-install'],
-          before => Exec['drush-cr']
+          require => Exec['site-install']
+        } ->
+
+        exec {'drush-cr':
+          command => "/usr/local/bin/drush cr >/dev/null 2>&1",
+          cwd => "${docroot}/server",
+          user => 'modem',
+          group => 'www-data',
+          environment => ["HOME=/home/modem", "USER=modem", "LC_ALL=en_US.UTF-8", "LANG=en_US.UTF-8", "LANGUAGE=en_US.UTF-8", "SHELL=/bin/bash", "TERM=xterm"],
+          timeout => 100,
+          creates => '/home/modem/.deploydrupal',
+          before => Exec['touchdeploy']
         }
       }
     }

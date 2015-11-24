@@ -1,6 +1,6 @@
 <?php
 
-$cmd = './sf2.sh ';
+$cmd = './sf2migrate.sh ';
 
 $cmd.= $_SERVER['DOCUMENT_ROOT'] . '/';
 $cmd = eregi_replace('server/.*$', '/', $cmd) ;
