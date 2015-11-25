@@ -304,18 +304,20 @@ class pm::deploy::drupal {
     case $framework {
       'Drupal6': {
         exec { 'memcachesettingsd6':
-          command => 'echo  "$conf[\'cache_inc\'] = \'./sites/all/modules/memcache/memcache.inc\';$conf[\’memcache_bins\’] = array(\’cache\’ => \’default\’, \’cache_form\’ => \’database\’);" >> sites/default/settings.php',
+          command => 'echo  "\$conf[\'cache_inc\'] = \'./sites/all/modules/memcache/memcache.inc\';\$conf[\'memcache_bins\'] = array(\'cache\' => \'default\', \'cache_form\' => \'database\');" >> sites/default/settings.php',
           cwd => "${docroot}/server",
           user => 'root',
+          creates => '/home/modem/.deploydrupal',
           require => Exec['site-install'],
           before => Exec['touchdeploy']
         }
       }
       'Drupal7': {
         exec { 'memcachesettingsd7':
-          command => 'echo  "$conf[\'cache_backends\'][] = \‘./sites/all/modules/memcache/memcache.inc\';$conf[\'cache_default_class\'] = \'MemCacheDrupal\’;$conf[\'cache_class_cache_form\'] = \'DrupalDatabaseCache\';" >> sites/default/settings.php',
+          command => 'echo  "\$conf[\'cache_backends\'][] = \'./sites/all/modules/memcache/memcache.inc\';\$conf[\'cache_default_class\'] = \'MemCacheDrupal\';\$conf[\'cache_class_cache_form\'] = \'DrupalDatabaseCache\';" >> sites/default/settings.php',
           cwd => "${docroot}/server",
           user => 'root',
+          creates => '/home/modem/.deploydrupal',
           require => Exec['site-install'],
           before => Exec['touchdeploy']
         }
@@ -326,6 +328,7 @@ class pm::deploy::drupal {
           cwd => "${docroot}/server",
           user => 'modem',
           group => 'www-data',
+          creates => '/home/modem/.deploydrupal',
           environment => ["HOME=/home/modem", "USER=modem", "LC_ALL=en_US.UTF-8", "LANG=en_US.UTF-8", "LANGUAGE=en_US.UTF-8", "SHELL=/bin/bash", "TERM=xterm"],
           require => Exec['site-install']
         } ->
