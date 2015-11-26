@@ -93,8 +93,8 @@ Disallow: /'
   }
 
   #install mongo extension only if mongo is part of the project
-  $is_mongo = hiera("is_mongo", "no")
-  if $is_mongo == "yes" {
+  $ismongo = hiera("ismongo", 0)
+  if $ismongo == 1 {
     exec { "pecl-mongo":
       command => "/usr/bin/yes '' | /usr/bin/pecl install --force mongo-1.5.8",
       user => "root",
@@ -110,7 +110,7 @@ Disallow: /'
     }
     ->
 
-    exec { "/etc/php5/cli/conf.d/20-mongo.ini":
+    file { "/etc/php5/cli/conf.d/20-mongo.ini":
       content => "extension=mongo.so",
       owner => "root"
     }
@@ -119,8 +119,8 @@ Disallow: /'
   php::module { [ 'mysql', 'redis', 'memcached', 'gd', 'curl', 'intl', 'mcrypt' ]: }
 
   # install pm_tools only if auth is enabled
-  $is_auth = hiera("is_auth", "no")
-  if $is_auth == "yes" {
+  $isauth = hiera("isauth", 0)
+  if $isauth == 1 {
     file { '/var/www/pm_tools':
       ensure => directory,
       recurse => remote,

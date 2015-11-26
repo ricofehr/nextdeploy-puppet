@@ -14,40 +14,45 @@ class pm::varnish {
 
   package { 'varnish':
     ensure => present,
-  }
-  ->
+  } ->
+
   file { '/lib/systemd/system/varnish.service':
     ensure => file,
     mode   => 644,
-    source => "puppet:///modules/pm/varnish/varnish.service.${v}"
-  }
-  ->
+    source => "puppet:///modules/pm/varnish/varnish.service.${v}",
+    owner => 'root'
+  } ->
+
   file { '/etc/default/varnish':
     ensure => file,
     mode   => 644,
-    source => "puppet:///modules/pm/varnish/varnish_default.${v}"
-  }
-  ->
+    source => "puppet:///modules/pm/varnish/varnish_default.${v}",
+    owner => 'root'
+  } ->
+
   file { '/etc/varnish/default.vcl':
     ensure => file,
     mode   => 644,
     source => [
       "puppet:///modules/pm/varnish/default.vcl.${v}"
-    ]
+    ],
+    owner => 'root'
   } ->
+  
   file { '/etc/varnish/auth.vcl':
     ensure => file,
     mode   => 644,
     source => [
       "puppet:///modules/pm/varnish/auth/auth.vcl_${fqdn}",
       "puppet:///modules/pm/varnish/auth.vcl"
-    ]
+    ],
+    owner => 'root'
   } ->
+
   service { 'varnish':
     ensure     => running,
     enable     => true,
-  }
-  ->
+  } ->
   # ugly condition (check if varnish is listening on port 80)
   exec { 'systemctl-reload':
     command => 'systemctl daemon-reload',

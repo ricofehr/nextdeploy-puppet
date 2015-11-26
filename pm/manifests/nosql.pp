@@ -16,6 +16,13 @@ class pm::nosql::mongo {
   class {'::mongodb::server': 
     pidfilepath => '/tmp/mongod.pid'
   }
+  ->
+  package { [
+    'mongodb-org-shell',
+    'mongodb-org-tools'
+    ]:
+    ensure => installed
+  }
 }
 
 
