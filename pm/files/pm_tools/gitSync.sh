@@ -70,5 +70,4 @@ else
 fi
 echo "########";
 
-rm -f ${TESTMEP}
 exit $rc;

@@ -13,10 +13,9 @@ echo "########";
     export LANG=fr_FR.UTF-8
     echo "# Updating \"$1server\"";
     cd $1/server
-    drush -y updb
+    drush -y updb 2>&1
     rc=$?;
 echo "########";
 
 # Exit
-#exit 0;
 exit $rc;

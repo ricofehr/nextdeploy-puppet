@@ -17,13 +17,12 @@ echo "########";
     # if d6 or d7, cc all
     drush status "Drupal version" | grep "8" >/dev/null 2>&1
     if (( $? == 0 )); then
-      drush -y cr
+      drush -y cr 2>&1
     else
-      drush -y cc all
+      drush -y cc all 2>&1
     fi
     rc=$?;
 echo "########";
 
 # Exit
-#exit 0;
 exit $rc;
