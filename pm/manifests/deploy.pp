@@ -365,6 +365,7 @@ class pm::deploy::wordpress {
   $commit = hiera('commit', 'HEAD')
   $username = hiera('httpuser', 'admin')
   $adminpass = hiera('httppasswd', 'nextdeploy')
+  $projectname = hiera('project', 'currentproject')
 
   Exec {
     path => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/", "/usr/local/bin", "/opt/bin" ],
@@ -409,7 +410,7 @@ class pm::deploy::wordpress {
   } ->
 
   exec { 'installbdd':
-    command => "wp core install --url=${weburi} --title=vm --admin_user=${username} --admin_password=${adminpass} --admin_email=${email}"
+    command => "wp core install --url=${weburi} --title=${projectname} --admin_user=${username} --admin_password=${adminpass} --admin_email=${email}"
   } ->
 
   exec { 'touchdeploy':
