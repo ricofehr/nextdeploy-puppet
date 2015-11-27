@@ -60,7 +60,7 @@ class pm::elastic {
     command => 'touch /home/modem/.esrun'
   } ->
 
-  service { 'elasticsearhc': 
+  service { 'elasticsearch': 
     ensure => 'running',
     enable     => true
   }
