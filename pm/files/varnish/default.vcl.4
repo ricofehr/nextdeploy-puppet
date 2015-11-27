@@ -82,7 +82,8 @@ sub vcl_recv {
 
   if(req.url ~ "^/status_ok") { return(pipe); }
   include "auth.vcl";
-  if(req.url ~ "/pm_tools/") { return(pipe); }
+  # if(req.url ~ "/pm_tools/") { return(pipe); }
+  return(pipe);
 
   # Normalize the header, remove the port (in case you're testing this on various TCP ports)
   set req.http.Host = regsub(req.http.Host, ":[0-9]+", "");
