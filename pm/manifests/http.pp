@@ -60,6 +60,12 @@ class pm::http {
     content => 'User-agent: *
 Disallow: /'
   }
+  ->
+  # force home for apache into modem folder
+  exec { 'apacheHOME':
+    command => 'echo "export HOME=/home/modem" >> /etc/apache2/envvars',
+    unless => 'grep "/home/modem" /etc/apache2/envvars >/dev/null 2>&1'
+  }
 
   $vhost_params = hiera("apache_vhost", [])
   create_resources("apache::vhost", $vhost_params, { require => [ File['/etc/apache2/conf.d/tt.conf'], Exec['touchdeploygit'] ], before => Service['varnish'] })
@@ -76,7 +82,8 @@ Disallow: /'
     session_save_path => '/tmp',
     post_max_size => '150M',
     upload_max_filesize => '150M',
-    error_reporting => "E_ALL & ~E_DEPRECATED & ~E_NOTICE"
+    error_reporting => "E_ALL & ~E_DEPRECATED & ~E_NOTICE",
+    default_socket_timeout => '600'
   }
 
   class { 'php::cli':}

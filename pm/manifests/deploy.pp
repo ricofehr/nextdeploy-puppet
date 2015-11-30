@@ -22,14 +22,17 @@ class pm::deploy::vhost {
     command => 'echo "StrictHostKeyChecking no" >> /etc/ssh/ssh_config',
     user => 'root'
   } ->
+  
   exec { 'mkdir_docroot':
     command => "mkdir -p ${docroot}",
     user => 'root'
   } ->
+
   exec { 'chown_varwww':
     command => "chown -R modem:www-data ${docroot}",
     user => 'root'
   } ->
+
   exec { 'gitclone':
     command => "git clone -b ${branch} ${gitpath} ${docroot}",
     user => 'modem',
@@ -38,12 +41,45 @@ class pm::deploy::vhost {
     unless => "test -d ${docroot}/.git",
     require => [ Package['git-core'], File['/home/modem/.ssh/id_rsa'] ]
   } ->
+
   exec { 'gitreset':
     command => "git reset --hard ${commit}",
     user => 'modem',
     cwd => "${docroot}",
     group => 'www-data'
   } ->
+
+  exec { 'npminstall':
+    command => 'npm install',
+    onlyif => 'test -f package.json'
+  } ->
+
+  exec { 'bowerinstall':
+    command => 'bower install',
+    onlyif => 'test -f bower.json'
+  } ->
+
+  exec { 'gruntbuild':
+    command => 'grunt build',
+    onlyif => 'test -f Gruntfile.js'
+  } ->
+
+  file { '/usr/local/bin/npm.sh':
+    source => [ "puppet:///modules/pm/npm.sh" ],
+    owner => 'modem',
+    group => 'www-data',
+    mode => '0755'
+  } ->
+
+  exec { 'npmsh':
+    command => "npm.sh ${docroot}",
+    environment => ["HOME=/home/modem"],
+    user => 'modem',
+    group => 'www-data',
+    cwd => '/home/modem',
+    require => [ Package['grunt-cli'], Package['bower'], Package['gulp'] ]
+  } ->
+
   exec { 'touchdeploygit':
     command => 'touch /home/modem/.deploygit',
     user => 'modem'
@@ -188,29 +224,10 @@ class pm::deploy::nodejs {
     require => [ Service['varnish'], Exec['touchdeploygit'] ]
   }
 
-  exec { 'npminstall':
-    command => 'npm install',
-    onlyif => 'test -f package.json'
-  } ->
-
-  exec { 'bowerinstall':
-    command => 'bower install',
-    onlyif => 'test -f bower.json'
-  } ->
-
-  exec { 'gruntbuild':
-    command => 'grunt build',
-    onlyif => 'test -f Gruntfile.js'
-  } ->
-
-  exec { 'gulpbuild':
-    command => 'gulp build',
-    onlyif => 'test -f gulpfile.js'
-  } ->
-
   exec { 'pm2start':
     command => 'pm2 start -f app.js',
-    onlyif => 'test -f app.js'
+    onlyif => 'test -f app.js',
+    require => Exec['npmsh']
   } ->
 
   exec { 'touchdeploynodejs':
