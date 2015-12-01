@@ -166,11 +166,100 @@ class pm::deploy::symfony2 {
   } ->
 
   exec { 'assetic':
-    command => 'php app/console assetic:dump'
+    command => 'php app/console assetic:dump',
+    onlyif => 'php bin/console | grep assetic'
   } ->
 
   exec { 'touchdeploy':
     command => 'touch /home/modem/.deploysf2'
+  }
+
+}
+
+# == Class: pm::deploy::symfony3
+#
+# Deploy the symfony3 framework from the documentroot of the project
+#
+#
+# === Authors
+#
+# Eric Fehr <eric.fehr@publicis-modem.fr>
+#
+class pm::deploy::symfony3 {
+  $docroot = hiera('docrootgit', '/var/www/html')
+
+  Exec {
+    path => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/", "/usr/local/bin", "/opt/bin" ],
+    user => 'modem',
+    group => 'www-data',
+    unless => 'test -f /home/modem/.deploysf3',
+    cwd => "${docroot}/server",
+    environment => ["HOME=/home/modem"],
+    timeout => 1800,
+    require => [ Service['varnish'], Exec['touchdeploygit'] ]
+  }
+
+  # Ensure the logs/cache directory exists with the right permissions
+  file { "${docroot}/server/app/logs":
+    ensure            =>  directory,
+    owner             =>  modem,
+    group             =>  www-data,
+    mode              =>  '0770'
+  } ->
+
+  # Ensure the logs/cache directory exists with the right permissions
+  file { "${docroot}/server/app/cache":
+    ensure            =>  directory,
+    owner             =>  modem,
+    group             =>  www-data,
+    mode              =>  '0770'
+  } ->
+
+  exec { 'composerdl':
+    command => 'curl -sS https://getcomposer.org/installer | php',
+    unless => 'test -f composer.phar'
+  } ->
+
+  exec { 'composer':
+    command => 'php composer.phar install -n --prefer-source'
+  } ->
+
+  exec { 'parameters_dbname':
+    command => 'sed -i "s,database_name:.*$,database_name: s_bdd," app/config/parameters.yml'
+  } ->
+
+  exec { 'parameters_dbuser':
+    command => 'sed -i "s,database_user:.*$,database_user: s_bdd," app/config/parameters.yml'
+  } ->
+
+  exec { 'parameters_dbpasswd':
+    command => 'sed -i "s,database_password:.*$,database_password: s_bdd," app/config/parameters.yml'
+  } ->
+
+  exec { 'parameters_mongoserver':
+    command => 'sed -i "s,mongodb_server:.*$,mongodb_server: mongodb://localhost:27017," app/config/parameters.yml'
+  } ->
+
+  exec { 'parameters_mongoname':
+    command => 'sed -i "s,mongodb_default_name:.*$,mongodb_default_name: mongodb," app/config/parameters.yml'
+  } ->
+
+  exec { 'schema':
+    command => 'php bin/console doctrine:schema:create',
+    onlyif => 'ps aux | grep mysqld | grep -v grep'
+  } ->
+
+  exec { 'assets':
+    command => 'php bin/console assets:install --symlink'
+  } ->
+
+  exec { 'assetic':
+    command => 'php bin/console assetic:dump',
+    onlyif => 'php bin/console | grep assetic'
+  } ->
+
+  exec { 'touchdeploy':
+    command => 'touch /home/modem/.deploysf3'
   }
 
 }
