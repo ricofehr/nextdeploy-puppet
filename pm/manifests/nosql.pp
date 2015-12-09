@@ -8,15 +8,25 @@
 # Eric Fehr <eric.fehr@publicis-modem.fr>
 #
 class pm::nosql::mongo {
+  Exec {
+    path => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/", "/usr/local/bin", "/opt/bin" ]
+  }
+
+  #apt key server for 3.2
+  exec { 'aptkeymongo3.2':
+    command => 'apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv EA312927',
+    onlyif => 'test -d /etc/apt && ! test -f /usr/bin/mongod'
+  } ->
+
   #mongo setting
   class {'::mongodb::globals':
-  manage_package_repo => true,
-  }
-  ->
+  manage_package_repo => true
+  } ->
+
   class {'::mongodb::server': 
     pidfilepath => '/tmp/mongod.pid'
-  }
-  ->
+  } ->
+  
   package { [
     'mongodb-org-shell',
     'mongodb-org-tools'
