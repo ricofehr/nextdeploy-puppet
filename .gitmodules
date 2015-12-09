@@ -21,7 +21,7 @@
 	url = https://github.com/saz/puppet-memcached
 [submodule "mongodb"]
 	path = mongodb
-	url = https://github.com/puppetlabs/puppetlabs-mongodb.git
+	url = https://github.com/Poil/puppetlabs-mongodb.git
 [submodule "mysql"]
 	path = mysql
 	url = https://github.com/puppetlabs/puppetlabs-mysql.git
