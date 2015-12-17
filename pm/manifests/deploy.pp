@@ -301,6 +301,7 @@ class pm::deploy::static {
 #
 class pm::deploy::nodejs {
   $docroot = hiera('docrootgit', '/var/www/html')
+  $weburi = hiera('weburi', '')
 
   Exec {
     path => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/", "/usr/local/bin", "/opt/bin" ],
@@ -316,6 +317,28 @@ class pm::deploy::nodejs {
   exec { 'pm2start':
     command => 'pm2 start -f app.js',
     onlyif => 'test -f app.js',
+    require => Exec['npmsh']
+  } ->
+
+  exec { 'pm2start_server':
+    command => 'pm2 start -f server.js',
+    onlyif => 'test -f server.js',
+    require => Exec['npmsh']
+  } ->
+
+  # reactjs start
+  exec { 'pm2start_server_bin':
+    command => 'pm2 start -f bin/server.js',
+    environment => ["HOME=/home/modem", "PORT=3100", "NODE_PATH=./src", "PORT=3100", "APIPORT=3200", "HOST=nodejs.${weburi}", "APIHOST=127.0.0.1"],
+    onlyif => 'test -f bin/server.js',
+    require => Exec['npmsh']
+  } ->
+
+  # reactjs start
+  exec { 'pm2start_api_bin':
+    command => 'pm2 start -f bin/api.js',
+    environment => ["HOME=/home/modem", "PORT=3100", "NODE_PATH=./src", "PORT=3100", "APIPORT=3200", "HOST=nodejs.${weburi}", "APIHOST=127.0.0.1"],
+    onlyif => 'test -f bin/api.js',
     require => Exec['npmsh']
   } ->
 
