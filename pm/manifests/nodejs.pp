@@ -11,9 +11,9 @@ class pm::nodejs {
 
 # nodejs and ember_build prerequisites
   class { '::nodejs':
-    manage_package_repo       => false,
-    nodejs_dev_package_ensure => 'present',
-    npm_package_ensure        => 'present',
+    repo_url_suffix => 'node_4.x',
+    # nodejs_dev_package_ensure => 'present',
+    # npm_package_ensure        => 'present',
   }
   ->
   file { '/usr/bin/node':
