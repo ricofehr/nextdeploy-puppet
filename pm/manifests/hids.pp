@@ -5,11 +5,11 @@
 #
 # === Authors
 #
-# Eric Fehr <eric.fehr@publicis-modem.fr>
+# Eric Fehr <ricofehr@nextdeploy.io>
 #
 class pm::hids::agent {
   Exec { path => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/", "/usr/local/bin", "/opt/bin" ] }
-  
+
   $ossecip = hiera('ossecip', '')
 
   class { "ossec::client":

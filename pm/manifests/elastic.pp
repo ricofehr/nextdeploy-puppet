@@ -5,7 +5,7 @@
 #
 # === Authors
 #
-# Eric Fehr <eric.fehr@publicis-modem.fr>
+# Eric Fehr <ricofehr@nextdeploy.io>
 #
 class pm::elastic {
   Exec {
@@ -31,10 +31,10 @@ class pm::elastic {
     command => 'apt-get update',
     user => 'root'
   } ->
-  
+
   # elastic setting
   # avoid use official module because too many issues
-  #class { 'elasticsearch': 
+  #class { 'elasticsearch':
   #  repo_version => '1.4',
   #  ensure => 'present',
   #  java_install => true
@@ -55,12 +55,12 @@ class pm::elastic {
     onlyif => 'test -f /etc/default/elasticsearch',
     user => 'root'
   } ->
-  
+
   exec { 'touches':
     command => 'touch /home/modem/.esrun'
   } ->
 
-  service { 'elasticsearch': 
+  service { 'elasticsearch':
     ensure => 'running',
     enable     => true
   }
