@@ -5,7 +5,7 @@
 #
 # === Authors
 #
-# Eric Fehr <eric.fehr@publicis-modem.fr>
+# Eric Fehr <ricofehr@nextdeploy.io>
 #
 class pm::nosql::mongo {
   Exec {
@@ -23,10 +23,10 @@ class pm::nosql::mongo {
   manage_package_repo => true
   } ->
 
-  class {'::mongodb::server': 
+  class {'::mongodb::server':
     pidfilepath => '/tmp/mongod.pid'
   } ->
-  
+
   package { [
     'mongodb-org-shell',
     'mongodb-org-tools'
@@ -43,7 +43,7 @@ class pm::nosql::mongo {
 #
 # === Authors
 #
-# Eric Fehr <eric.fehr@publicis-modem.fr>
+# Eric Fehr <ricofehr@nextdeploy.io>
 #
 class pm::nosql::memcache {
   #memcached setting
@@ -63,7 +63,7 @@ class pm::nosql::memcache {
 #
 # === Authors
 #
-# Eric Fehr <eric.fehr@publicis-modem.fr>
+# Eric Fehr <ricofehr@nextdeploy.io>
 #
 class pm::nosql::redis {
   # redis setting

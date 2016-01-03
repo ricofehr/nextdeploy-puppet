@@ -5,10 +5,10 @@
 #
 # === Authors
 #
-# Eric Fehr <eric.fehr@publicis-modem.fr>
+# Eric Fehr <ricofehr@nextdeploy.io>
 #
 class pm::base::apt {
-  Exec { 
+  Exec {
     path => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/", "/usr/local/bin", "/opt/bin" ],
     unless => 'test -f /home/modem/.touchaptupdate'
   }
@@ -32,13 +32,13 @@ class pm::base::apt {
 #
 # === Authors
 #
-# Eric Fehr <eric.fehr@publicis-modem.fr>
+# Eric Fehr <ricofehr@nextdeploy.io>
 #
 class pm::base {
   Exec { path => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/", "/usr/local/bin", "/opt/bin" ] }
 
   $email = hiera('email', 'user@example.com')
-  
+
   #list of pkgs
   package { [
         'gpgv',

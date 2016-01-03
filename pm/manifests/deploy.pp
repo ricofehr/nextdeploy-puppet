@@ -5,7 +5,7 @@
 #
 # === Authors
 #
-# Eric Fehr <eric.fehr@publicis-modem.fr>
+# Eric Fehr <ricofehr@nextdeploy.io>
 #
 class pm::deploy::vhost {
   Exec {
@@ -22,7 +22,7 @@ class pm::deploy::vhost {
     command => 'echo "StrictHostKeyChecking no" >> /etc/ssh/ssh_config',
     user => 'root'
   } ->
-  
+
   exec { 'mkdir_docroot':
     command => "mkdir -p ${docroot}",
     user => 'root'
@@ -95,7 +95,7 @@ class pm::deploy::vhost {
 #
 # === Authors
 #
-# Eric Fehr <eric.fehr@publicis-modem.fr>
+# Eric Fehr <ricofehr@nextdeploy.io>
 #
 class pm::deploy::symfony2 {
   $docroot = hiera('docrootgit', '/var/www/html')
@@ -183,7 +183,7 @@ class pm::deploy::symfony2 {
 #
 # === Authors
 #
-# Eric Fehr <eric.fehr@publicis-modem.fr>
+# Eric Fehr <ricofehr@nextdeploy.io>
 #
 class pm::deploy::symfony3 {
   $docroot = hiera('docrootgit', '/var/www/html')
@@ -272,7 +272,7 @@ class pm::deploy::symfony3 {
 #
 # === Authors
 #
-# Eric Fehr <eric.fehr@publicis-modem.fr>
+# Eric Fehr <ricofehr@nextdeploy.io>
 #
 class pm::deploy::static {
   Exec {
@@ -297,7 +297,7 @@ class pm::deploy::static {
 #
 # === Authors
 #
-# Eric Fehr <eric.fehr@publicis-modem.fr>
+# Eric Fehr <ricofehr@nextdeploy.io>
 #
 class pm::deploy::nodejs {
   $docroot = hiera('docrootgit', '/var/www/html')
@@ -355,7 +355,7 @@ class pm::deploy::nodejs {
 #
 # === Authors
 #
-# Eric Fehr <eric.fehr@publicis-modem.fr>
+# Eric Fehr <ricofehr@nextdeploy.io>
 #
 class pm::deploy::drupal {
   $docroot = hiera('docrootgit', '/var/www/html')
@@ -380,7 +380,7 @@ class pm::deploy::drupal {
     command => "sleep 30",
     creates => '/home/modem/.deploydrupal'
   } ->
-  
+
   exec { 'getdrush':
     command => 'wget http://files.drush.org/drush.phar',
     creates => '/usr/local/bin/drush',
@@ -411,7 +411,7 @@ class pm::deploy::drupal {
     timeout => 100,
     creates => '/home/modem/.drush/drushrc.php'
   } ->
-  
+
   exec {'site-install':
     command => "/usr/local/bin/drush -y site-install --db-url=mysql://s_bdd:s_bdd@localhost:3306/s_bdd --locale=en --account-name=${username} --account-pass=${adminpass} --site-name=${projectname} --account-mail=${email} --site-mail=${email} standard >/dev/null 2>&1",
     cwd => "${docroot}/server",
@@ -485,7 +485,7 @@ class pm::deploy::drupal {
 #
 # === Authors
 #
-# Eric Fehr <eric.fehr@publicis-modem.fr>
+# Eric Fehr <ricofehr@nextdeploy.io>
 #
 class pm::deploy::wordpress {
   $docroot = hiera('docrootgit', '/var/www/html')
@@ -555,7 +555,7 @@ class pm::deploy::wordpress {
 #
 # === Authors
 #
-# Eric Fehr <eric.fehr@publicis-modem.fr>
+# Eric Fehr <ricofehr@nextdeploy.io>
 #
 class pm::deploy::postinstall {
   $docroot = hiera('docrootgit', '/var/www/html')

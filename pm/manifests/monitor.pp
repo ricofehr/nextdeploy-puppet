@@ -6,7 +6,7 @@
 #
 # === Authors
 #
-# Eric Fehr <eric.fehr@publicis-modem.fr>
+# Eric Fehr <ricofehr@nextdeploy.io>
 #
 class pm::monitor::collect {
   $influxip = hiera('influxip')
@@ -77,7 +77,7 @@ class pm::monitor::collect {
 #
 # === Authors
 #
-# Eric Fehr <eric.fehr@publicis-modem.fr>
+# Eric Fehr <ricofehr@nextdeploy.io>
 #
 class pm::monitor::collect::apache {
   class { 'collectd::plugin::apache':
@@ -96,7 +96,7 @@ class pm::monitor::collect::apache {
 #
 # === Authors
 #
-# Eric Fehr <eric.fehr@publicis-modem.fr>
+# Eric Fehr <ricofehr@nextdeploy.io>
 #
 class pm::monitor::collect::varnish {
   class { 'collectd::plugin::varnish':
@@ -128,7 +128,7 @@ class pm::monitor::collect::varnish {
 #
 # === Authors
 #
-# Eric Fehr <eric.fehr@publicis-modem.fr>
+# Eric Fehr <ricofehr@nextdeploy.io>
 #
 class pm::monitor::collect::redis {
   class { '::collectd::plugin::redis':
@@ -147,7 +147,7 @@ class pm::monitor::collect::redis {
 #
 # === Authors
 #
-# Eric Fehr <eric.fehr@publicis-modem.fr>
+# Eric Fehr <ricofehr@nextdeploy.io>
 #
 class pm::monitor::collect::mysql {
   collectd::plugin::mysql::database { 's_bdd':
