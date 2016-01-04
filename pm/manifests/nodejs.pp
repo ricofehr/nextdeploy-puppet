@@ -25,4 +25,7 @@ class pm::nodejs {
     ensure   => present,
     provider => 'npm',
   }
+
+  # ensure that apt-update is running before install nodejs package
+  Apt::Source <| |> ~> Class['apt::update'] -> Package['nodejs']
 }
