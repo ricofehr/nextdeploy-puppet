@@ -77,6 +77,7 @@ class pm::deploy::vhost {
     user => 'modem',
     group => 'www-data',
     cwd => '/home/modem',
+    timeout => 1800,
     require => [ Package['grunt-cli'], Package['bower'], Package['gulp'] ]
   } ->
 
