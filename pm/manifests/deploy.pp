@@ -49,21 +49,6 @@ class pm::deploy::vhost {
     group => 'www-data'
   } ->
 
-  exec { 'npminstall':
-    command => 'npm install',
-    onlyif => 'test -f package.json'
-  } ->
-
-  exec { 'bowerinstall':
-    command => 'bower install',
-    onlyif => 'test -f bower.json'
-  } ->
-
-  exec { 'gruntbuild':
-    command => 'grunt build',
-    onlyif => 'test -f Gruntfile.js'
-  } ->
-
   file { '/usr/local/bin/npm.sh':
     source => [ "puppet:///modules/pm/npm.sh" ],
     owner => 'modem',
@@ -134,7 +119,8 @@ class pm::deploy::symfony2 {
   } ->
 
   exec { 'composer':
-    command => 'php composer.phar install -n --prefer-source'
+    command => 'php composer.phar install -n --prefer-source',
+    onlyif => 'test -f composer.phar'
   } ->
 
   exec { 'parameters_dbname':
@@ -222,7 +208,8 @@ class pm::deploy::symfony3 {
   } ->
 
   exec { 'composer':
-    command => 'php composer.phar install -n --prefer-source'
+    command => 'php composer.phar install -n --prefer-source',
+    onlyif => 'test -f composer.phar'
   } ->
 
   exec { 'parameters_dbname':
@@ -380,6 +367,25 @@ class pm::deploy::drupal {
   exec {'sleepopcache':
     command => "sleep 30",
     creates => '/home/modem/.deploydrupal'
+  } ->
+
+  exec { 'composerdl':
+    command => 'curl -sS https://getcomposer.org/installer | php',
+    cwd => "${docroot}/server",
+    user => 'modem',
+    group => 'www-data',
+    environment => ["HOME=/home/modem"],
+    onlyif => 'test -f composer.json',
+    unless => 'test -f composer.phar'
+  } ->
+
+  exec { 'composer':
+    command => 'php composer.phar install -n --prefer-source',
+    cwd => "${docroot}/server",
+    user => 'modem',
+    group => 'www-data',
+    environment => ["HOME=/home/modem"],
+    onlyif => 'test -f composer.phar'
   } ->
 
   exec { 'getdrush':
