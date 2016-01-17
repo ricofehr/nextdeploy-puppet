@@ -1,5 +1,5 @@
 # nextdeploy-puppet
-The puppet repository who manage the virtual machines installation for the [nextdeploy project](https://github.com/ricofehr/nextdeploy) users
+The puppet repository who manages the virtual machines installation for the [nextdeploy project](https://github.com/ricofehr/nextdeploy) users
 
 ## Submodules and Clone
 The puppet modules of the community are included in the project in the form of Submodules git.

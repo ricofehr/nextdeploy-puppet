@@ -53,7 +53,6 @@ class pm::base {
         'git-core',
         'ethtool',
         'wget',
-        'postfix',
         'mailutils',
         'ncftp',
         'curl'
