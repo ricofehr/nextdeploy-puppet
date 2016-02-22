@@ -67,6 +67,7 @@ sub vcl_recv {
 
   if (req.url ~ "^/status_ok") { return(pipe); }
   include "auth.vcl";
+  unset req.http.Authorization;
   return(pipe);
   #if (req.url ~ "/pm_tools/") { return(pipe); }
 
