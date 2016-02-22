@@ -8,7 +8,7 @@ pushd $DOCROOT >/dev/null
 find . -maxdepth 6 -name package.json | grep -v "node_modules" | while read GFILE; do
   pushd "${GFILE%/*}" >/dev/null
   npm install
-  grep '"build"' package.json >/dev/null 2>&1 && npm build
+  grep '"build"' package.json >/dev/null 2>&1 && npm run build
   popd >/dev/null
 done
 
