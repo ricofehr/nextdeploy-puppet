@@ -419,6 +419,14 @@ class pm::deploy::drupal {
     creates => '/home/modem/.drush/drushrc.php'
   } ->
 
+  exec {'drush-sleep':
+    command => "sleep 30",
+    user => 'modem',
+    group => 'www-data',
+    timeout => 100,
+    creates => '/home/modem/.deploydrupal'
+  } ->
+
   exec {'site-install':
     command => "/usr/local/bin/drush -y site-install --db-url=mysql://s_bdd:s_bdd@localhost:3306/s_bdd --locale=en --account-name=${username} --account-pass=${adminpass} --site-name=${projectname} --account-mail=${email} --site-mail=${email} standard >/dev/null 2>&1",
     cwd => "${docroot}/server",
