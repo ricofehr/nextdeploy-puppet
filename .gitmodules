@@ -55,3 +55,6 @@
 [submodule "collectd"]
 	path = collectd
 	url = https://github.com/puppet-community/puppet-collectd
+[submodule "mongodb"]
+	path = mongodb
+	url = https://github.com/puppetlabs/puppetlabs-mongodb
