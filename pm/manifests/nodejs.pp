@@ -25,6 +25,13 @@ class pm::nodejs {
     provider => 'npm',
   }
 
+  exec { 'nodejs-aptupdate':
+    command => "/usr/bin/apt-get update",
+    timeout => 1800,
+    user => 'root',
+    creates => '/usr/bin/node'
+  }
+
   # ensure that apt-update is running before install nodejs package
-  Apt::Source <| |> ~> Class['apt::update'] -> Package['nodejs']
+  Apt::Source <| |> ~> Exec['nodejs-aptupdate'] -> Package['nodejs']
 }
