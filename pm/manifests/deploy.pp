@@ -614,10 +614,12 @@ class pm::deploy::postinstall {
 
   exec { 'importsh':
     command => "/bin/bash scripts/import.sh --uri ${weburi} --framework ${framework} --ftpuser ${ftpuser} --ftppasswd ${ftppasswd} --ismysql ${ismysql} --ismongo ${ismongo} > /home/modem/import.log",
+    timeout => 14400
   } ->
 
   exec { 'postinstall':
     command => "/bin/bash scripts/postinstall.sh ${weburi} > /home/modem/postinstall.log",
+    timeout => 7200
   } ->
 
   exec { 'touch_cron':
