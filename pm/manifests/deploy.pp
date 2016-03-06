@@ -66,6 +66,13 @@ class pm::deploy::vhost {
     require => [ Package['grunt-cli'], Package['bower'], Package['gulp'] ]
   } ->
 
+  file { '/usr/local/bin/composer.sh':
+    source => [ "puppet:///modules/pm/composer.sh" ],
+    owner => 'modem',
+    group => 'www-data',
+    mode => '0755'
+  } ->
+
   exec { 'touchdeploygit':
     command => 'touch /home/modem/.deploygit',
     user => 'modem'
@@ -113,14 +120,13 @@ class pm::deploy::symfony2 {
     mode              =>  '0770'
   } ->
 
-  exec { 'composerdl':
-    command => 'curl -sS https://getcomposer.org/installer | php',
-    unless => 'test -f composer.phar'
-  } ->
-
-  exec { 'composer':
-    command => 'php composer.phar install -n --prefer-source',
-    onlyif => 'test -f composer.phar'
+  exec { 'composersh':
+    command => "composer.sh ${docroot}",
+    environment => ["HOME=/home/modem"],
+    user => 'modem',
+    group => 'www-data',
+    cwd => '/home/modem',
+    timeout => 1800
   } ->
 
   exec { 'parameters_dbname':
@@ -202,14 +208,13 @@ class pm::deploy::symfony3 {
     mode              =>  '0770'
   } ->
 
-  exec { 'composerdl':
-    command => 'curl -sS https://getcomposer.org/installer | php',
-    unless => 'test -f composer.phar'
-  } ->
-
-  exec { 'composer':
-    command => 'php composer.phar install -n --prefer-source',
-    onlyif => 'test -f composer.phar'
+  exec { 'composersh':
+    command => "composer.sh ${docroot}",
+    environment => ["HOME=/home/modem"],
+    user => 'modem',
+    group => 'www-data',
+    cwd => '/home/modem',
+    timeout => 1800
   } ->
 
   exec { 'parameters_dbname':
@@ -263,6 +268,8 @@ class pm::deploy::symfony3 {
 # Eric Fehr <ricofehr@nextdeploy.io>
 #
 class pm::deploy::static {
+  $docroot = hiera('docrootgit', '/var/www/html')
+
   Exec {
     path => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/", "/usr/local/bin", "/opt/bin" ],
     user => 'modem',
@@ -272,6 +279,16 @@ class pm::deploy::static {
     timeout => 1800,
     require => [ Service['varnish'], Exec['touchdeploygit'] ]
   }
+
+  exec { 'composersh':
+    command => "composer.sh ${docroot}",
+    environment => ["HOME=/home/modem"],
+    user => 'modem',
+    group => 'www-data',
+    cwd => '/home/modem',
+    timeout => 1800,
+    onlyif => 'test -f /usr/bin/php'
+  } ->
 
   exec { 'touchdeploy':
     command => 'touch /home/modem/.deploystatic'
@@ -369,23 +386,13 @@ class pm::deploy::drupal {
     creates => '/home/modem/.deploydrupal'
   } ->
 
-  exec { 'composerdl':
-    command => 'curl -sS https://getcomposer.org/installer | php',
-    cwd => "${docroot}/server",
+  exec { 'composersh':
+    command => "composer.sh ${docroot}",
+    environment => ["HOME=/home/modem"],
     user => 'modem',
     group => 'www-data',
-    environment => ["HOME=/home/modem"],
-    onlyif => 'test -f composer.json',
-    unless => 'test -f composer.phar'
-  } ->
-
-  exec { 'composer':
-    command => 'php composer.phar install -n --prefer-source',
-    cwd => "${docroot}/server",
-    user => 'modem',
-    group => 'www-data',
-    environment => ["HOME=/home/modem"],
-    onlyif => 'test -f composer.phar'
+    cwd => '/home/modem',
+    timeout => 1800
   } ->
 
   exec { 'getdrush':
