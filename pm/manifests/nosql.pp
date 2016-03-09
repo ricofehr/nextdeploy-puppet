@@ -12,15 +12,9 @@ class pm::nosql::mongo {
     path => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/", "/usr/local/bin", "/opt/bin" ]
   }
 
-  #apt key server for 3.2
-  exec { 'aptkeymongo3.2':
-    command => 'apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv EA312927',
-    onlyif => 'test -d /etc/apt && ! test -f /usr/bin/mongod'
-  } ->
-
   #mongo setting
   class {'::mongodb::globals':
-  manage_package_repo => true
+    manage_package_repo => true
   } ->
 
   class {'::mongodb::server':
@@ -31,8 +25,20 @@ class pm::nosql::mongo {
     'mongodb-org-shell',
     'mongodb-org-tools'
     ]:
-    ensure => installed
+    ensure => installed,
+    require => Package['mongodb-org-server']
   }
+
+  exec { 'mongo-aptupdate':
+    command => "/usr/bin/apt-get update",
+    timeout => 1800,
+    user => 'root',
+    creates => '/usr/bin/mongod',
+    onlyif => 'test -d /etc/apt'
+  }
+
+  # ensure that apt-update is running before install nodejs package
+  Apt::Source <| |> ~> Exec['mongo-aptupdate'] -> Package['mongodb-org-server']
 }
 
 
