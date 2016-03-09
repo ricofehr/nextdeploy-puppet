@@ -123,7 +123,7 @@ Disallow: /'
     }
   }
 
-  php::module { [ 'mysql', 'redis', 'memcached', 'gd', 'curl', 'intl', 'mcrypt' ]: }
+  php::module { [ 'mysql', 'redis', 'memcached', 'gd', 'curl', 'intl', 'mcrypt', 'ldap' ]: }
 
   # install pm_tools only if auth is enabled
   $isauth = hiera("isauth", 0)
