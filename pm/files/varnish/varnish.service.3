@@ -6,7 +6,7 @@ Type=forking
 LimitNOFILE=131072
 LimitMEMLOCK=82000
 ExecStartPre=/usr/sbin/varnishd -C -f /etc/varnish/default.vcl
-ExecStart=/usr/sbin/varnishd -a :80 -T localhost:6082 -f /etc/varnish/default.vcl -s malloc,64m
+ExecStart=/usr/sbin/varnishd -a :80 -T localhost:6082 -f /etc/varnish/default.vcl -s malloc,64m -p pipe_timeout=600
 ExecReload=/usr/share/varnish/reload-vcl
 
 [Install]
