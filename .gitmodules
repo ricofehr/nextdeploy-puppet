@@ -58,3 +58,9 @@
 [submodule "mongodb"]
 	path = mongodb
 	url = https://github.com/puppetlabs/puppetlabs-mongodb
+[submodule "archive"]
+	path = archive
+	url = https://github.com/voxpupuli/puppet-archive
+[submodule "java"]
+	path = java
+	url = https://github.com/puppetlabs/puppetlabs-java
