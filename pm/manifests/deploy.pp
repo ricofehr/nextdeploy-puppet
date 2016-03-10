@@ -603,6 +603,11 @@ class pm::deploy::postinstall {
     timeout => 1800
   }
 
+  exec { 'hosts_writable':
+    command => 'chmod 777 /etc/hosts',
+    user => 'root'
+  } ->
+  
   exec { 'touch_importsh':
     command => 'touch scripts/import.sh',
   } ->
