@@ -23,6 +23,7 @@ class pm::nodejs {
   package { ['pm2', 'grunt-cli', 'grunt', 'bower', 'gulp']:
     ensure   => present,
     provider => 'npm',
+    before => Exec['npmsh']
   }
 
   exec { 'nodejs-aptupdate':
