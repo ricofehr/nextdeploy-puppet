@@ -56,15 +56,6 @@ class pm::deploy::vhost {
     mode => '0755'
   } ->
 
-  exec { 'npmsh':
-    command => "npm.sh ${docroot}",
-    environment => ["HOME=/home/modem"],
-    user => 'modem',
-    group => 'www-data',
-    cwd => '/home/modem',
-    timeout => 1800
-  } ->
-
   file { '/usr/local/bin/composer.sh':
     source => [ "puppet:///modules/pm/composer.sh" ],
     owner => 'modem',
@@ -117,6 +108,15 @@ class pm::deploy::symfony2 {
     owner             =>  modem,
     group             =>  www-data,
     mode              =>  '0770'
+  } ->
+
+  exec { 'npmsh':
+    command => "npm.sh ${docroot}",
+    environment => ["HOME=/home/modem"],
+    user => 'modem',
+    group => 'www-data',
+    cwd => '/home/modem',
+    timeout => 1800
   } ->
 
   exec { 'composersh':
@@ -207,6 +207,15 @@ class pm::deploy::symfony3 {
     mode              =>  '0770'
   } ->
 
+  exec { 'npmsh':
+    command => "npm.sh ${docroot}",
+    environment => ["HOME=/home/modem"],
+    user => 'modem',
+    group => 'www-data',
+    cwd => '/home/modem',
+    timeout => 1800
+  } ->
+
   exec { 'composersh':
     command => "composer.sh ${docroot}",
     environment => ["HOME=/home/modem"],
@@ -279,6 +288,15 @@ class pm::deploy::static {
     require => [ Service['varnish'], Exec['touchdeploygit'] ]
   }
 
+  exec { 'npmsh':
+    command => "npm.sh ${docroot}",
+    environment => ["HOME=/home/modem"],
+    user => 'modem',
+    group => 'www-data',
+    cwd => '/home/modem',
+    timeout => 1800
+  } ->
+
   exec { 'composersh':
     command => "composer.sh ${docroot}",
     environment => ["HOME=/home/modem"],
@@ -291,6 +309,52 @@ class pm::deploy::static {
 
   exec { 'touchdeploy':
     command => 'touch /home/modem/.deploystatic'
+  }
+}
+
+# == Class: pm::deploy::noweb
+#
+# Deploy a noweb project, for batch or cli purposes
+#
+#
+# === Authors
+#
+# Eric Fehr <ricofehr@nextdeploy.io>
+#
+class pm::deploy::noweb {
+  $docroot = hiera('docrootgit', '/var/www/html')
+
+  Exec {
+    path => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/", "/usr/local/bin", "/opt/bin" ],
+    user => 'modem',
+    group => 'www-data',
+    unless => 'test -f /home/modem/.deploynoweb',
+    environment => ["HOME=/home/modem"],
+    timeout => 1800,
+    require => [ Exec['touchdeploygit'] ]
+  }
+
+  exec { 'npmsh':
+    command => "npm.sh ${docroot}",
+    environment => ["HOME=/home/modem"],
+    user => 'modem',
+    group => 'www-data',
+    cwd => '/home/modem',
+    timeout => 1800
+  } ->
+
+  exec { 'composersh':
+    command => "composer.sh ${docroot}",
+    environment => ["HOME=/home/modem"],
+    user => 'modem',
+    group => 'www-data',
+    cwd => '/home/modem',
+    timeout => 1800,
+    onlyif => 'test -f /usr/bin/php'
+  } ->
+
+  exec { 'touchdeploy':
+    command => 'touch /home/modem/.deploynoweb'
   }
 }
 
@@ -383,6 +447,15 @@ class pm::deploy::drupal {
   exec {'sleepopcache':
     command => "sleep 30",
     creates => '/home/modem/.deploydrupal'
+  } ->
+
+  exec { 'npmsh':
+    command => "npm.sh ${docroot}",
+    environment => ["HOME=/home/modem"],
+    user => 'modem',
+    group => 'www-data',
+    cwd => '/home/modem',
+    timeout => 1800
   } ->
 
   exec { 'composersh':
@@ -528,6 +601,15 @@ class pm::deploy::wordpress {
     require => [ Service['varnish'], Exec['touchdeploygit'] ]
   }
 
+  exec { 'npmsh':
+    command => "npm.sh ${docroot}",
+    environment => ["HOME=/home/modem"],
+    user => 'modem',
+    group => 'www-data',
+    cwd => '/home/modem',
+    timeout => 1800
+  } ->
+
   exec { 'wp-cli1':
     command => 'curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar',
     cwd => '/tmp'
@@ -659,6 +741,7 @@ class pm::deploy::postinstall {
 
   exec { 'restartvarnish_postinstall':
     command => 'service varnish restart',
+    onlyif => 'test -d /etc/varnish',
     user => 'root'
   } ->
 
