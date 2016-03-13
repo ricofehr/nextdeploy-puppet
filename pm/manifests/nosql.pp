@@ -25,6 +25,7 @@ class pm::nosql::mongo {
     'mongodb-org-shell',
     'mongodb-org-tools'
     ]:
+    install_options => ['--force-yes'],
     ensure => installed,
     require => Package['mongodb-org-server']
   }
