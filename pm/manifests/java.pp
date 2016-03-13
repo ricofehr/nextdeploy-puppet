@@ -26,8 +26,8 @@ class pm::java ($version = '7') {
 
   #rabbit setting
   class { '::java':
-    distribution => 'jdk', 
-    version => $version
+    distribution => 'jdk',
+    package => "openjdk-${version}-jdk"
   }
 
 }
