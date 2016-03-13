@@ -63,6 +63,13 @@ class pm::deploy::vhost {
     mode => '0755'
   } ->
 
+  file { '/usr/local/bin/mvn.sh':
+    source => [ "puppet:///modules/pm/mvn.sh" ],
+    owner => 'modem',
+    group => 'www-data',
+    mode => '0755'
+  } ->
+
   exec { 'touchdeploygit':
     command => 'touch /home/modem/.deploygit',
     user => 'modem'
@@ -307,6 +314,16 @@ class pm::deploy::static {
     onlyif => 'test -f /usr/bin/php'
   } ->
 
+  exec { 'mvnsh':
+    command => "mvn.sh ${docroot}",
+    environment => ["HOME=/home/modem"],
+    user => 'modem',
+    group => 'www-data',
+    cwd => '/home/modem',
+    timeout => 7200,
+    onlyif => 'test -f /usr/bin/mvn'
+  } ->
+
   exec { 'touchdeploy':
     command => 'touch /home/modem/.deploystatic'
   }
@@ -351,6 +368,16 @@ class pm::deploy::noweb {
     cwd => '/home/modem',
     timeout => 1800,
     onlyif => 'test -f /usr/bin/php'
+  } ->
+
+  exec { 'mvnsh':
+    command => "mvn.sh ${docroot}",
+    environment => ["HOME=/home/modem"],
+    user => 'modem',
+    group => 'www-data',
+    cwd => '/home/modem',
+    timeout => 7200,
+    onlyif => 'test -f /usr/bin/mvn'
   } ->
 
   exec { 'touchdeploy':
