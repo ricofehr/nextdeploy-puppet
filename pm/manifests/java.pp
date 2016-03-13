@@ -27,7 +27,9 @@ class pm::java ($version = '7') {
   #rabbit setting
   class { '::java':
     distribution => 'jdk',
-    package => "openjdk-${version}-jdk"
+    package => "openjdk-${version}-jdk",
+    java_alternative => "java-1.${version}.0-openjdk-${::architecture}",
+    java_alternative_path => "/usr/lib/jvm/java-1.${version}.0-openjdk-${::architecture}/bin/java"
   }
 
 }
