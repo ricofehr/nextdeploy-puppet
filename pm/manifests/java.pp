@@ -30,6 +30,9 @@ class pm::java ($version = '7') {
     package => "openjdk-${version}-jdk",
     java_alternative => "java-1.${version}.0-openjdk-${::architecture}",
     java_alternative_path => "/usr/lib/jvm/java-1.${version}.0-openjdk-${::architecture}/bin/java"
-  }
+  } ->
 
+  class { 'maven::maven':
+     version => "3.2.5",
+  }
 }
