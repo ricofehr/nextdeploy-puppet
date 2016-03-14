@@ -12,23 +12,23 @@ class pm::nosql::mongo {
     path => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/", "/usr/local/bin", "/opt/bin" ]
   }
 
+  ensure_packages(['apt-transport-https'])
+
   #mongo setting
   class {'::mongodb::globals':
-    manage_package_repo => true
+    manage_package_repo => true,
+    require => Package['apt-transport-https']
   } ->
 
   class {'::mongodb::server':
-    pidfilepath => '/tmp/mongod.pid'
+    pidfilepath => '/tmp/mongod.pid',
+    require => Package['apt-transport-https']
   } ->
 
-  package { [
-    'mongodb-org-shell',
-    'mongodb-org-tools'
-    ]:
-    install_options => ['--allow-unauthenticated', '-f'],
-    ensure => installed,
-    require => Package['mongodb-org-server']
+  class {'::mongodb::client':
+    require => Package['apt-transport-https']
   }
+
 
   exec { 'mongo-aptupdate':
     command => "/usr/bin/apt-get update",
