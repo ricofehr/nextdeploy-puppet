@@ -12,6 +12,8 @@ class pm::nosql::mongo {
     path => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/", "/usr/local/bin", "/opt/bin" ]
   }
 
+  $version = hiera('mongodb::globals::version', '3.2.0')
+
   ensure_packages(['apt-transport-https'])
 
   #mongo setting
@@ -27,6 +29,12 @@ class pm::nosql::mongo {
 
   class {'::mongodb::client':
     require => Package['apt-transport-https']
+  } ->
+
+  package { 'mongodb_tool':
+      ensure => "${version}",
+      name   => 'mongodb-org-tools',
+      tag    => 'mongodb',
   }
 
 
