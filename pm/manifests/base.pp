@@ -55,8 +55,7 @@ class pm::base {
         'wget',
         'mailutils',
         'ncftp',
-        'curl',
-        'apt-transport-https'
+        'curl'
         ]:
         ensure => installed,
   }
