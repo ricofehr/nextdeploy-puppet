@@ -34,5 +34,6 @@ class pm::java ($version = '7') {
 
   class { 'maven::maven':
      version => "3.2.5",
+     before => Exec['mvnsh']
   }
 }
