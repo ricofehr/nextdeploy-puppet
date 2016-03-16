@@ -19,7 +19,8 @@ class pm::sql {
   }
 
   exec {'restart-mysql':
-    command => 'service mysql restart'
+    command => 'service mysql restart',
+    before => Exec['importsh']
   }
   ->
   exec { 'touchsqlrestart':

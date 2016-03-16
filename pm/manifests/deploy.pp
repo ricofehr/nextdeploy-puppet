@@ -118,7 +118,7 @@ class pm::deploy::symfony2 {
   } ->
 
   exec { 'npmsh':
-    command => "npm.sh ${docroot}",
+    command => "npm.sh ${docroot} >/home/modem/lognpm 2>&1",
     environment => ["HOME=/home/modem"],
     user => 'modem',
     group => 'www-data',
@@ -127,7 +127,7 @@ class pm::deploy::symfony2 {
   } ->
 
   exec { 'composersh':
-    command => "composer.sh ${docroot}",
+    command => "composer.sh ${docroot} >/home/modem/logcomposer 2>&1",
     environment => ["HOME=/home/modem"],
     user => 'modem',
     group => 'www-data',
@@ -215,7 +215,7 @@ class pm::deploy::symfony3 {
   } ->
 
   exec { 'npmsh':
-    command => "npm.sh ${docroot}",
+    command => "npm.sh ${docroot} >/home/modem/lognpm 2>&1",
     environment => ["HOME=/home/modem"],
     user => 'modem',
     group => 'www-data',
@@ -224,7 +224,7 @@ class pm::deploy::symfony3 {
   } ->
 
   exec { 'composersh':
-    command => "composer.sh ${docroot}",
+    command => "composer.sh ${docroot} >/home/modem/logcomposer 2>&1",
     environment => ["HOME=/home/modem"],
     user => 'modem',
     group => 'www-data',
@@ -296,7 +296,7 @@ class pm::deploy::static {
   }
 
   exec { 'npmsh':
-    command => "npm.sh ${docroot}",
+    command => "npm.sh ${docroot} >/home/modem/lognpm 2>&1",
     environment => ["HOME=/home/modem"],
     user => 'modem',
     group => 'www-data',
@@ -305,7 +305,7 @@ class pm::deploy::static {
   } ->
 
   exec { 'composersh':
-    command => "composer.sh ${docroot}",
+    command => "composer.sh ${docroot} >/home/modem/logcomposer 2>&1",
     environment => ["HOME=/home/modem"],
     user => 'modem',
     group => 'www-data',
@@ -315,7 +315,7 @@ class pm::deploy::static {
   } ->
 
   exec { 'mvnsh':
-    command => "mvn.sh ${docroot}",
+    command => "mvn.sh ${docroot} >/home/modem/logmvn 2>&1",
     environment => ["HOME=/home/modem"],
     user => 'modem',
     group => 'www-data',
@@ -352,7 +352,7 @@ class pm::deploy::noweb {
   }
 
   exec { 'npmsh':
-    command => "npm.sh ${docroot}",
+    command => "npm.sh ${docroot} >/home/modem/lognpm 2>&1",
     environment => ["HOME=/home/modem"],
     user => 'modem',
     group => 'www-data',
@@ -361,7 +361,7 @@ class pm::deploy::noweb {
   } ->
 
   exec { 'composersh':
-    command => "composer.sh ${docroot}",
+    command => "composer.sh ${docroot} >/home/modem/logcomposer 2>&1",
     environment => ["HOME=/home/modem"],
     user => 'modem',
     group => 'www-data',
@@ -371,7 +371,7 @@ class pm::deploy::noweb {
   } ->
 
   exec { 'mvnsh':
-    command => "mvn.sh ${docroot}",
+    command => "mvn.sh ${docroot} >/home/modem/logmvn 2>&1",
     environment => ["HOME=/home/modem"],
     user => 'modem',
     group => 'www-data',
@@ -477,7 +477,7 @@ class pm::deploy::drupal {
   } ->
 
   exec { 'npmsh':
-    command => "npm.sh ${docroot}",
+    command => "npm.sh ${docroot} >/home/modem/lognpm 2>&1",
     environment => ["HOME=/home/modem"],
     user => 'modem',
     group => 'www-data',
@@ -486,7 +486,7 @@ class pm::deploy::drupal {
   } ->
 
   exec { 'composersh':
-    command => "composer.sh ${docroot}",
+    command => "composer.sh ${docroot} >/home/modem/logcomposer 2>&1",
     environment => ["HOME=/home/modem"],
     user => 'modem',
     group => 'www-data',
@@ -629,7 +629,7 @@ class pm::deploy::wordpress {
   }
 
   exec { 'npmsh':
-    command => "npm.sh ${docroot}",
+    command => "npm.sh ${docroot} >/home/modem/lognpm 2>&1",
     environment => ["HOME=/home/modem"],
     user => 'modem',
     group => 'www-data',
@@ -733,12 +733,12 @@ class pm::deploy::postinstall {
   } ->
 
   exec { 'importsh':
-    command => "/bin/bash scripts/import.sh --uri ${weburi} --framework ${framework} --ftpuser ${ftpuser} --ftppasswd ${ftppasswd} --ismysql ${ismysql} --ismongo ${ismongo} > /home/modem/import.log",
+    command => "/bin/bash scripts/import.sh --uri ${weburi} --framework ${framework} --ftpuser ${ftpuser} --ftppasswd ${ftppasswd} --ismysql ${ismysql} --ismongo ${ismongo} >/home/modem/import.log 2>&1",
     timeout => 14400
   } ->
 
   exec { 'postinstall':
-    command => "/bin/bash scripts/postinstall.sh ${weburi} > /home/modem/postinstall.log",
+    command => "/bin/bash scripts/postinstall.sh ${weburi} >/home/modem/postinstall.log 2>&1",
     timeout => 7200
   } ->
 
