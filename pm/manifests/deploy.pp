@@ -155,6 +155,16 @@ class pm::deploy::symfony2 {
     command => 'sed -i "s,mongodb_default_name:.*$,mongodb_default_name: mongodb," app/config/parameters.yml'
   } ->
 
+  exec { 'rmcachedev':
+    command => 'rm -rf app/cache/dev',
+    onlyif => 'test -d app/cache/dev'
+  } ->
+
+  exec { 'rmcacheprod':
+    command => 'rm -rf app/cache/prod',
+    onlyif => 'test -d app/cache/prod'
+  } ->
+
   exec { 'schema':
     command => 'php app/console doctrine:schema:create',
     onlyif => 'ps aux | grep mysqld | grep -v grep'
@@ -250,6 +260,16 @@ class pm::deploy::symfony3 {
 
   exec { 'parameters_mongoname':
     command => 'sed -i "s,mongodb_default_name:.*$,mongodb_default_name: mongodb," app/config/parameters.yml'
+  } ->
+
+  exec { 'rmcachedev':
+    command => 'rm -rf app/cache/dev',
+    onlyif => 'test -d app/cache/dev'
+  } ->
+
+  exec { 'rmcacheprod':
+    command => 'rm -rf app/cache/prod',
+    onlyif => 'test -d app/cache/prod'
   } ->
 
   exec { 'schema':
