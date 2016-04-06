@@ -5,10 +5,6 @@ $cmd = './drupalupdb.sh ';
 $cmd.= $_SERVER['DOCUMENT_ROOT'] . '/';
 $cmd = eregi_replace('server/.*$', '/', $cmd) ;
 
-if (isset($_GET['u'])) {
-  $cmd .= " u 2>&1" ;
-}
-
 $dataArray = array(
 	'title' => 'Drupal updb',
 	'content' => '',

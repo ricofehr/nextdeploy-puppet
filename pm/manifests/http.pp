@@ -132,6 +132,12 @@ Disallow: /'
       ensure => directory,
       recurse => remote,
       source => 'puppet:///modules/pm/pm_tools'
+    } ->
+
+    exec { "pma":
+      command => 'tar xvfz phpmyadmin.tar.gz',
+      unless => 'test -d phpmyadmin',
+      cwd => '/var/www/pm_tools'
     }
   }
 
