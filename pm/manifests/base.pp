@@ -38,6 +38,16 @@ class pm::base {
   Exec { path => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/", "/usr/local/bin", "/opt/bin" ] }
 
   $email = hiera('email', 'user@example.com')
+  $modemlayout = hiera('layout', 'fr')
+  $modempasswd = fqdn_rand_string(6, 'ertyuioplkjhgfdsxcvbn', strftime("%s"))
+  $modemsaltpasswd = pw_hash("${modempasswd}", 'SHA-512', 'nextdeploy')
+  $nextdeployuri = hiera('nextdeployuri', 'nextdeploy.local')
+  $vm_name = hiera('name', 'undefined')
+
+  #ensure console-data is absent
+  package { 'console-data':
+    ensure => purged
+  } ->
 
   #list of pkgs
   package { [
@@ -89,8 +99,12 @@ LC_ALL=en_US.UTF-8",
     gid => 'www-data',
     home => '/home/modem',
     managehome => 'true',
-    password => sha1('modem'),
     shell => '/bin/bash'
+  }
+  -> 
+  # exec usermod instead of User reference beacause weird puppet bug into trusty
+  exec { 'changepasswd':
+    command => "/usr/sbin/usermod -p '${modemsaltpasswd}' modem"
   }
   ->
   # Ensure the .ssh directory exists with the right permissions
@@ -146,5 +160,18 @@ LC_ALL=en_US.UTF-8",
     require => Package['git-core'],
     user => 'modem',
     cwd => '/home/modem'
+  } ->
+  # ensure no-root can cahnge locale
+  file_line { 'sudo_rule_loadkeys':
+    path => '/etc/sudoers',
+    line => 'modem ALL=(ALL) NOPASSWD: /bin/loadkeys',
+  } ->
+  # change layout at login
+  file_line { 'profile_layout':
+    path => '/home/modem/.profile',
+    line => "sudo loadkeys ${modemlayout}",
+  } ->
+  exec { 'curl_resetmodempasswd':
+    command => "curl -X PUT -k -s https://api.${nextdeployuri}/api/v1/vms/${vm_name}/resetpassword/${modempasswd} >/dev/null 2>&1"
   }
 }
