@@ -50,21 +50,42 @@ class pm::deploy::vhost {
   } ->
 
   file { '/usr/local/bin/npm.sh':
-    source => [ "puppet:///modules/pm/npm.sh" ],
+    source => 'puppet:///modules/pm/tools/npm.sh',
     owner => 'modem',
     group => 'www-data',
     mode => '0755'
   } ->
 
   file { '/usr/local/bin/composer.sh':
-    source => [ "puppet:///modules/pm/composer.sh" ],
+    source => 'puppet:///modules/pm/tools/composer.sh',
     owner => 'modem',
     group => 'www-data',
     mode => '0755'
   } ->
 
   file { '/usr/local/bin/mvn.sh':
-    source => [ "puppet:///modules/pm/mvn.sh" ],
+    source => 'puppet:///modules/pm/tools/mvn.sh',
+    owner => 'modem',
+    group => 'www-data',
+    mode => '0755'
+  } ->
+
+  file { '/usr/local/bin/import.sh':
+    source => 'puppet:///modules/pm/tools/import.sh',
+    owner => 'modem',
+    group => 'www-data',
+    mode => '0755'
+  } ->
+
+  file { '/usr/local/bin/export.sh':
+    source => 'puppet:///modules/pm/tools/export.sh',
+    owner => 'modem',
+    group => 'www-data',
+    mode => '0755'
+  } ->
+
+  file { '/usr/local/bin/refreshcommit.sh':
+    source => 'puppet:///modules/pm/tools/refreshcommit.sh',
     owner => 'modem',
     group => 'www-data',
     mode => '0755'
@@ -74,7 +95,6 @@ class pm::deploy::vhost {
     command => 'touch /home/modem/.deploygit',
     user => 'modem'
   }
-
 }
 
 
@@ -444,7 +464,7 @@ class pm::deploy::nodejs {
   # reactjs start
   exec { 'pm2start_server_bin':
     command => 'pm2 start -f bin/server.js',
-    environment => ["HOME=/home/modem", "PORT=3100", "NODE_PATH=./src", "PORT=3100", "APIPORT=3200", "HOST=nodejs.${weburi}", "APIHOST=127.0.0.1"],
+    environment => ["HOME=/home/modem", "PORT=3100", "NODE_PATH=./src", "APIPORT=3200", "HOST=nodejs.${weburi}", "APIHOST=127.0.0.1"],
     onlyif => 'test -f bin/server.js',
     require => Exec['npmsh']
   } ->
@@ -452,7 +472,7 @@ class pm::deploy::nodejs {
   # reactjs start
   exec { 'pm2start_api_bin':
     command => 'pm2 start -f bin/api.js',
-    environment => ["HOME=/home/modem", "PORT=3100", "NODE_PATH=./src", "PORT=3100", "APIPORT=3200", "HOST=nodejs.${weburi}", "APIHOST=127.0.0.1"],
+    environment => ["HOME=/home/modem", "PORT=3100", "NODE_PATH=./src", "APIPORT=3200", "HOST=nodejs.${weburi}", "APIHOST=127.0.0.1"],
     onlyif => 'test -f bin/api.js',
     require => Exec['npmsh']
   } ->
@@ -492,7 +512,7 @@ class pm::deploy::drupal {
   } ->
 
   exec {'sleepopcache':
-    command => "sleep 30",
+    command => "sleep 10",
     creates => '/home/modem/.deploydrupal'
   } ->
 
@@ -502,6 +522,7 @@ class pm::deploy::drupal {
     user => 'modem',
     group => 'www-data',
     cwd => '/home/modem',
+    creates => '/home/modem/.deploydrupal',
     timeout => 1800
   } ->
 
@@ -511,6 +532,7 @@ class pm::deploy::drupal {
     user => 'modem',
     group => 'www-data',
     cwd => '/home/modem',
+    creates => '/home/modem/.deploydrupal',
     timeout => 1800
   } ->
 
@@ -717,7 +739,7 @@ class pm::deploy::postinstall {
     command => 'chmod 777 /etc/hosts',
     user => 'root'
   } ->
-  
+
   exec { 'touch_importsh':
     command => 'touch scripts/import.sh',
   } ->
@@ -735,8 +757,9 @@ class pm::deploy::postinstall {
   } ->
 
   exec { 'importsh':
-    command => "/bin/bash scripts/import.sh --uri ${weburi} --framework ${framework} --ftpuser ${ftpuser} --ftppasswd ${ftppasswd} --ismysql ${ismysql} --ismongo ${ismongo} >/home/modem/import.log 2>&1",
-    timeout => 14400
+    command => "import.sh --framework ${framework} --ftpuser ${ftpuser} --ftppasswd ${ftppasswd} --ismysql ${ismysql} --ismongo ${ismongo} >/home/modem/import.log 2>&1",
+    timeout => 14400,
+    require => File['/usr/local/bin/import.sh']
   } ->
 
   exec { 'postinstall':
@@ -794,5 +817,11 @@ class pm::deploy::postinstall {
 
   exec { 'touchpostinstall':
     command => 'touch /home/modem/.postinstall'
+  } ->
+
+  exec { 'refreshcommit':
+    command => "refreshcommit.sh ${nextdeployuri} ${vm_name}",
+    unless => 'test "ok" = "nok"',
+    require => File['/usr/local/bin/refreshcommit.sh']
   }
 }
