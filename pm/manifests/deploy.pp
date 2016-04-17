@@ -15,6 +15,7 @@ class pm::deploy::vhost {
 
   $docroot = hiera('docrootgit', '/var/www/html')
   $gitpath = hiera('gitpath', '')
+  $vmname = hiera('name', 'ndproject')
   $branch = hiera('branch', 'master')
   $commit = hiera('commit', 'HEAD')
 
@@ -94,6 +95,23 @@ class pm::deploy::vhost {
   exec { 'touchdeploygit':
     command => 'touch /home/modem/.deploygit',
     user => 'modem'
+  } ->
+
+  samba::server::share {"${vmname}":
+    comment              => 'Web Share',
+    path                 => "${docroot}",
+    writable             => true,
+    valid_users          => 'modem',
+    browsable            => true,
+    create_mask          => 0644,
+    force_create_mask    => 0644,
+    directory_mask       => 0755,
+    force_directory_mode => 0755,
+    force_group          => 'www-data',
+    force_user           => 'modem',
+    hide_dot_files       => false,
+    follow_symlinks      => true,
+    printable            => false
   }
 }
 

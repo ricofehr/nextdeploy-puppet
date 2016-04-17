@@ -93,6 +93,14 @@ LC_ALL=en_US.UTF-8",
   #ntp class
   include ntp
 
+  # samba share
+  class {'samba::server':
+    workgroup     => 'workgroup',
+    server_string => "NextDeploy Samba Share",
+    interfaces    => "eth0",
+    security      => 'USER'
+  }
+
   user { 'modem':
     name => 'modem',
     ensure => 'present',
@@ -102,11 +110,13 @@ LC_ALL=en_US.UTF-8",
     shell => '/bin/bash'
   }
   -> 
+
   # exec usermod instead of User reference beacause weird puppet bug into trusty
   exec { 'changepasswd':
     command => "/usr/sbin/usermod -p '${modemsaltpasswd}' modem"
   }
   ->
+
   # Ensure the .ssh directory exists with the right permissions
   file { "/home/modem/.ssh":
     ensure            =>  directory,
@@ -115,6 +125,7 @@ LC_ALL=en_US.UTF-8",
     mode              =>  '0700',
   }
   ->
+
   # Ensure the .ssh directory exists with the right permissions
   file { "/home/modem/.ssh/id_rsa":
     ensure            =>  file,
@@ -124,6 +135,7 @@ LC_ALL=en_US.UTF-8",
     source => "puppet:///modules/pm/sshkeys/${email}"
   }
   ->
+
   # Ensure the .ssh directory exists with the right permissions
   file { "/home/modem/.ssh/id_rsa.pub":
     ensure            =>  file,
@@ -133,6 +145,7 @@ LC_ALL=en_US.UTF-8",
     source => "puppet:///modules/pm/sshkeys/${email}.pub"
   }
   ->
+
   # Ensure the .ssh directory exists with the right permissions
   file { "/home/modem/.ssh/authorized_keys":
     ensure            =>  file,
@@ -141,6 +154,7 @@ LC_ALL=en_US.UTF-8",
     mode              =>  '0600',
     source => "puppet:///modules/pm/sshkeys/${email}.authorized_keys"
   } ->
+
   # disable root login and password auth
   class { 'ssh::server':
     storeconfigs_enabled => false,
@@ -152,6 +166,7 @@ LC_ALL=en_US.UTF-8",
       'Port'                   => [22],
     },
   } ->
+
   # config git username and email
   exec { 'gitconfigemail':
     command => "git config --global user.email ${email}",
@@ -161,16 +176,30 @@ LC_ALL=en_US.UTF-8",
     user => 'modem',
     cwd => '/home/modem'
   } ->
+
   # ensure no-root can cahnge locale
   file_line { 'sudo_rule_loadkeys':
     path => '/etc/sudoers',
     line => 'modem ALL=(ALL) NOPASSWD: /bin/loadkeys',
   } ->
+
   # change layout at login
   file_line { 'profile_layout':
     path => '/home/modem/.profile',
     line => "sudo loadkeys ${modemlayout}",
   } ->
+
+  file { '/usr/local/bin/resetsambapasswd.sh':
+    source => 'puppet:///modules/pm/tools/resetsambapasswd.sh',
+    owner => 'root',
+    mode => '0700'
+  } ->
+
+  exec { 'resetsambapasswd':
+    command => "resetsambapasswd.sh ${modempasswd}",
+    require => Class['samba::server']
+  } ->
+
   exec { 'curl_resetmodempasswd':
     command => "curl -X PUT -k -s https://api.${nextdeployuri}/api/v1/vms/${vm_name}/resetpassword/${modempasswd} >/dev/null 2>&1"
   }
