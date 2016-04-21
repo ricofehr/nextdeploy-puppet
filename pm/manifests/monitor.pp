@@ -28,7 +28,7 @@ class pm::monitor::collect {
 
   class { 'collectd::plugin::cpu':
    reportbystate => true,
-   reportbycpu => true,
+   reportbycpu => false,
    valuespercentage => true,
   } ->
 
