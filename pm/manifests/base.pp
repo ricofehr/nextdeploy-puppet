@@ -44,10 +44,12 @@ class pm::base {
   $nextdeployuri = hiera('nextdeployuri', 'nextdeploy.local')
   $vm_name = hiera('name', 'undefined')
 
-  #ensure console-data is absent
-  package { 'console-data':
-    ensure => purged
-  } ->
+  #ensure console-data is present for debian
+  if $::operatingsystem == 'Debian' {
+    package { 'console-data':
+      ensure => installed
+    }
+  }
 
   #list of pkgs
   package { [
