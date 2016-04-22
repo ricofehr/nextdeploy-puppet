@@ -39,12 +39,13 @@ class pm::monitor::collect {
   } ->
 
   class { 'collectd::plugin::disk':
-   disks          => ['/^dm/'],
-   ignoreselected => true,
+   disks          => ['vda1'],
    udevnameattr   => 'DM_NAME',
   } ->
 
-  class { 'collectd::plugin::interface': } ->
+  class { 'collectd::plugin::interface':
+    interfaces     => ['eth0'],
+  } ->
 
   class { 'collectd::plugin::load': } ->
 
