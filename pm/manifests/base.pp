@@ -9,18 +9,21 @@
 #
 class pm::base::apt {
   Exec {
-    path => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/", "/usr/local/bin", "/opt/bin" ],
-    unless => 'test -f /home/modem/.touchaptupdate'
+    path => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/", "/usr/local/bin", "/opt/bin" ]
   }
 
   include apt
 
+  # execute apt-update once 3 hours
   exec { "apt-update":
     command => "apt-get update",
-    timeout => 1800
+    timeout => 1800,
+    onlyif => 'test "$(($(date +%l)%3))" = "0"',
+    unless => 'test -f /tmp/puppethour && test "$(date +%l)" = "$(cat /tmp/puppethour)"'
   } ->
-  exec { "touchaptupdate":
-    command => 'touch /home/modem/.touchaptupdate',
+
+  exec { "puppethour":
+    command => "echo $(date +%l) > /tmp/puppethour"
   }
 }
 
