@@ -774,7 +774,7 @@ class pm::deploy::postinstall {
   } ->
 
   exec { 'importsh':
-    command => "import.sh --framework ${framework} --ftpuser ${ftpuser} --ftppasswd ${ftppasswd} --ismysql ${ismysql} --ismongo ${ismongo} >/home/modem/import.log 2>&1",
+    command => "import.sh --uri ${weburi} --framework ${framework} --ftpuser ${ftpuser} --ftppasswd ${ftppasswd} --ismysql ${ismysql} --ismongo ${ismongo} >/home/modem/import.log 2>&1",
     timeout => 14400,
     require => File['/usr/local/bin/import.sh']
   } ->

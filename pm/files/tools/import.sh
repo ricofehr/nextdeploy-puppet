@@ -3,8 +3,6 @@
 ISMYSQL=0
 ISMONGO=0
 URI=''
-URIADMIN=''
-URIMOBILE=''
 FRAMEWORK=''
 FTPUSER=''
 FTPPASSWD=''
@@ -24,6 +22,7 @@ Usage: $0 [options]
 --ftphost xxxx    override nextdeploy ftp host
 --ismysql x       1/0 if mysql-server present (default is 0)
 --ismongo x       1/0 if mongo-server present (default is 0)
+--uri xxxx        main uri of the website (used by wordpress import)
 EOF
 
 exit 0
@@ -61,6 +60,11 @@ while (($# > 0)); do
     --ismongo)
       shift
       ISMONGO="$1"
+      shift
+      ;;
+    --uri)
+      shift
+      URI="$1"
       shift
       ;;
     -h)
