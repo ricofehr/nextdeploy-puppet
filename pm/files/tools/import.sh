@@ -129,6 +129,7 @@ postwordpress() {
   # if sql or mongo import, updb and cc
   pushd ${DOCROOT} > /dev/null
   wp option update siteurl "http://${URI}"
+  wp search-replace --all-tables 'ndwpuri' "${URI}"
   popd > /dev/null
 }
 

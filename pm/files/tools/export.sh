@@ -6,6 +6,7 @@ ISMONGO=0
 FRAMEWORK=''
 FTPUSER=''
 FTPPASSWD=''
+URI=''
 BRANCHS=('default')
 FTPHOST='nextdeploy'
 DOCROOT="$(pwd)/server"
@@ -22,7 +23,8 @@ Usage: $0 [options]
 --ftphost xxxx    override nextdeploy ftp host
 --ismysql x       1/0 if mysql-server present (default is 0)
 --ismongo x       1/0 if mysql-server present (default is 0)
---branchs xxxx     set branch(s) destination for export
+--branchs xxxx    set branch(s) destination for export
+--uri xxxx        main uri of the website (used by wordpress export)
 EOF
 
 exit 0
@@ -60,6 +62,11 @@ while (($# > 0)); do
     --ismongo)
       shift
       ISMONGO="$1"
+      shift
+      ;;
+    --uri)
+      shift
+      URI="$1"
       shift
       ;;
     --branchs)
@@ -144,6 +151,7 @@ exportsql() {
   pushd /tmp/dump > /dev/null
   echo "show databases" | mysql -u s_bdd -ps_bdd | grep -v -e "^Database$" | grep -v -e "^information_schema$" | while read dbname; do
     mysqldump -u s_bdd -ps_bdd $dbname > ${dbname}.sql
+    [[ "$FRAMEWORK" = 'wordpress' ]] && sed -i "s;$URI;ndwpuri;g" ${dbname}.sql
     gzip ${dbname}.sql
 
     for branch in ${BRANCHS[@]}; do
