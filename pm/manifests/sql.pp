@@ -20,7 +20,7 @@ class pm::sql {
 
   exec {'restart-mysql':
     command => 'service mysql restart',
-    before => Exec['importsh']
+    before => File['/usr/local/bin/import.sh']
   }
   ->
   exec { 'touchsqlrestart':
@@ -28,7 +28,5 @@ class pm::sql {
   }
   ->
   class { 'pm::monitor::collect::mysql': }
-
-  create_resources ('mysql::db', hiera('mysql_db', []))
 
 }

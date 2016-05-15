@@ -16,9 +16,9 @@ if (! empty($dataArray['log'])) {
 // format français
 if (setlocale(LC_TIME, 'fr_FR.utf8') === FALSE) {
     die('unable to setlocale()!');
-} 
+}
 
-$htmlDate = strftime('le %A %d %B %Y, à %H heures %M minutes et %S secondes', time()); 
+$htmlDate = strftime('le %A %d %B %Y, à %H heures %M minutes et %S secondes', time());
 $htmlRequesturi = 'http://' . htmlentities($_SERVER['SERVER_NAME'] . $_SERVER['REQUEST_URI'], ENT_QUOTES);
 $htmlRemoteAddr = htmlentities($_SERVER['REMOTE_ADDR'], ENT_QUOTES);
 if (gethostbyaddr($_SERVER['REMOTE_ADDR']) != $_SERVER['REMOTE_ADDR']) {

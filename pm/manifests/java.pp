@@ -13,7 +13,7 @@
 # Eric Fehr <ricofehr@nextdeploy.io>
 #
 class pm::java ($version = '7') {
-  
+
   # no java8 on ubuntu 14.04
   if $::operatingsystem == 'Ubuntu' and $::lsbdistrelease == '14.04' and $version == '8' {
     $version = '7'
@@ -34,6 +34,6 @@ class pm::java ($version = '7') {
 
   class { 'maven::maven':
      version => "3.2.5",
-     before => Exec['mvnsh']
+     before => File['/usr/local/bin/mvn.sh']
   }
 }

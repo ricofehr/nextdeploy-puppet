@@ -105,7 +105,7 @@ function isHumanReadableDomain($domain) {
                 . '|sl|sm|sn|so|sr|st|su|sv|sy|sz|tc|td|tf|tg|th|tj|tk|tm|tn|to|tp|tr|tt|tv|tw|tz|ua|ug'
                 . '|uk|um|us|uy|uz|va|vc|ve|vg|vi|vn|vu|wf|ws|ye|yt|yu|za|zm|zw)'
                 . '$/';
-  
+
   return is_string($domain) && preg_match($domain_regexp, $domain);
 }
 

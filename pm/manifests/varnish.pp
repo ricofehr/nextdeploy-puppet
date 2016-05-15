@@ -7,10 +7,15 @@
 #
 # Eric Fehr <ricofehr@nextdeploy.io>
 #
-class pm::varnish {
+class pm::varnish(
+  $backends = [],
+  $staticttl = '1h',
+  $version = 3,
+  $isauth = true,
+  $iscached = false,
+  $isprod = false,
+  $basicauth = 'b2tvazpva29r') {
   Exec { path => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/", "/usr/local/bin", "/opt/bin" ] }
-
-  $v = hiera('varnish_version')
 
   package { 'varnish':
     ensure => present,
@@ -19,34 +24,30 @@ class pm::varnish {
   file { '/lib/systemd/system/varnish.service':
     ensure => file,
     mode   => 644,
-    source => "puppet:///modules/pm/varnish/varnish.service.${v}",
+    source => "puppet:///modules/pm/varnish/varnish.service.${version}",
     owner => 'root'
   } ->
 
   file { '/etc/default/varnish':
     ensure => file,
     mode   => 644,
-    source => "puppet:///modules/pm/varnish/varnish_default.${v}",
+    source => "puppet:///modules/pm/varnish/varnish_default.${version}",
     owner => 'root'
   } ->
 
+  # Template uses:
+  # - $backends
+  # - $staticttl
+  # - $isauth
+  # - $iscached
+  # - $isprod
+  # - $basicauth
   file { '/etc/varnish/default.vcl':
     ensure => file,
     mode   => 644,
-    source => [
-      "puppet:///modules/pm/varnish/default.vcl.${v}"
-    ],
-    owner => 'root'
-  } ->
-
-  file { '/etc/varnish/auth.vcl':
-    ensure => file,
-    mode   => 644,
-    source => [
-      "puppet:///modules/pm/varnish/auth/auth.vcl_${fqdn}",
-      "puppet:///modules/pm/varnish/auth.vcl"
-    ],
-    owner => 'root'
+    content => template("pm/varnish/default.vcl.${version}.erb"),
+    owner => 'root',
+    notify => Service['varnish']
   } ->
 
   service { 'varnish':

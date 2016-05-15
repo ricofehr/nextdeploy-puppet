@@ -7,7 +7,8 @@ FRAMEWORK=''
 FTPUSER=''
 FTPPASSWD=''
 FTPHOST='nextdeploy'
-DOCROOT="$(pwd)/server"
+PATHURI="server"
+DOCROOT="$(pwd)/"
 BRANCH=""
 
 # display helpn all of this parametes are setted during vm install
@@ -16,7 +17,8 @@ posthelp() {
 Usage: $0 [options]
 
 -h                this is some help text.
---framework xxxx  framework of the project. choices between symfony2, drupal, wordpress, static (default)
+--framework xxxx  framework targetting
+--path xxxx       uniq path for the framework
 --ftpuser xxxx    ftp user on nextdeploy ftp server
 --ftppasswd xxxx  ftp password on nextdeploy ftp server
 --ftphost xxxx    override nextdeploy ftp host
@@ -62,6 +64,11 @@ while (($# > 0)); do
       ISMONGO="$1"
       shift
       ;;
+    --path)
+      shift
+      PATHURI="$1"
+      shift
+      ;;
     --uri)
       shift
       URI="$1"
@@ -76,6 +83,8 @@ while (($# > 0)); do
       ;;
   esac
 done
+
+DOCROOT="${DOCROOT}${PATHURI}"
 
 # get current branch
 pushd ${DOCROOT} >/dev/null
@@ -130,6 +139,7 @@ postwordpress() {
   pushd ${DOCROOT} > /dev/null
   wp option update siteurl "http://${URI}"
   wp search-replace --all-tables 'ndwpuri' "${URI}"
+  wp user update 1 --user_pass=$FTPPASSWD
   popd > /dev/null
 }
 
@@ -171,10 +181,10 @@ importsql() {
   mkdir /tmp/dump
 
   pushd /tmp/dump > /dev/null
-  ncftpget -u $FTPUSER -p $FTPPASSWD $FTPHOST . dump/${branchname}_*.sql.gz
+  ncftpget -u $FTPUSER -p $FTPPASSWD $FTPHOST . dump/${branchname}_${PATHURI}*.sql.gz
   if (( $? != 0 )); then
     branchname="default"
-    ncftpget -u $FTPUSER -p $FTPPASSWD $FTPHOST . dump/${branchname}_*.sql.gz
+    ncftpget -u $FTPUSER -p $FTPPASSWD $FTPHOST . dump/${branchname}_${PATHURI}*.sql.gz
   fi
 
   sqlfiles="$(ls *.sql.gz)"
@@ -209,10 +219,10 @@ importmongo() {
   mkdir /tmp/dump
 
   pushd /tmp/dump > /dev/null
-  ncftpget -u $FTPUSER -p $FTPPASSWD $FTPHOST . dump/${branchname}_*.tar.gz
+  ncftpget -u $FTPUSER -p $FTPPASSWD $FTPHOST . dump/${branchname}_${PATHURI}*.tar.gz
   if (( $? != 0 )); then
     branchname="default"
-    ncftpget -u $FTPUSER -p $FTPPASSWD $FTPHOST . dump/${branchname}_*.tar.gz
+    ncftpget -u $FTPUSER -p $FTPPASSWD $FTPHOST . dump/${branchname}_${PATHURI}*.tar.gz
   fi
 
   if (( $? == 0 )); then
@@ -243,10 +253,10 @@ assetsarchive() {
   mkdir /tmp/assets
 
   pushd /tmp/assets > /dev/null
-  ncftpget -u $FTPUSER -p $FTPPASSWD $FTPHOST . assets/${branchname}_assets.tar.gz
+  ncftpget -u $FTPUSER -p $FTPPASSWD $FTPHOST . assets/${branchname}_${PATHURI}_assets.tar.gz
   if (( $? != 0 )); then
     branchname="default"
-    ncftpget -u $FTPUSER -p $FTPPASSWD $FTPHOST . assets/${branchname}_assets.tar.gz
+    ncftpget -u $FTPUSER -p $FTPPASSWD $FTPHOST . assets/${branchname}_${PATHURI}_assets.tar.gz
     if (( $? != 0 )); then
       ncftpget -u $FTPUSER -p $FTPPASSWD $FTPHOST . assets/assets.tar.gz
     fi

@@ -35,7 +35,7 @@ class pm::nosql::mongo {
       ensure => "${version}",
       name   => 'mongodb-org-tools',
       tag    => 'mongodb',
-      before => Exec['importsh']
+      before => File['/usr/local/bin/import.sh']
   }
 
 

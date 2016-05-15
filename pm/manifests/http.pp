@@ -42,6 +42,15 @@ class pm::http {
   apache::mod { 'authn_core': }
   #apache::mod { 'authz_core': }
 
+  ::apache::vhost { 'defaultnd':
+    ensure          => present,
+    port            => 8080,
+    docroot         => '/var/www/html',
+    priority        => '15',
+    manage_docroot  => true,
+    ip              => '127.0.0.1'
+  }
+
   # avoid issue when restart apache2.4
   file { '/etc/apache2/conf.d/tt.conf':
     content => ''
@@ -67,10 +76,9 @@ Disallow: /'
     unless => 'grep "/home/modem" /etc/apache2/envvars >/dev/null 2>&1'
   }
 
-  $vhost_params = hiera("apache_vhost", [])
-  create_resources("apache::vhost", $vhost_params, { require => [ File['/etc/apache2/conf.d/tt.conf'], Exec['touchdeploygit'] ], before => Service['varnish'] })
+  #$vhost_params = hiera("apache_vhost", [])
+  #create_resources("apache::vhost", $vhost_params, { require => [ File['/etc/apache2/conf.d/tt.conf'], Exec['touchdeploygit'] ], before => Service['varnish'] })
 
-  $kvhost = keys($vhost_params)
   class {'::apache::mod::php':}
 
   php::ini { '/etc/php5/apache2/php.ini':
@@ -125,21 +133,18 @@ Disallow: /'
 
   php::module { [ 'mysql', 'redis', 'memcached', 'gd', 'curl', 'intl', 'mcrypt', 'ldap' ]: }
 
-  # install pm_tools only if auth is enabled
-  $isauth = hiera("isauth", 0)
-  if $isauth == 1 {
-    file { '/var/www/pm_tools':
-      ensure => directory,
-      recurse => remote,
-      source => 'puppet:///modules/pm/pm_tools'
-    } ->
+  file { '/var/www/pm_tools':
+    ensure => directory,
+    recurse => remote,
+    source => 'puppet:///modules/pm/pm_tools'
+  } ->
 
-    exec { "pma":
-      command => 'tar xvfz phpmyadmin.tar.gz',
-      unless => 'test -d phpmyadmin',
-      cwd => '/var/www/pm_tools'
-    }
+  exec { "pma":
+    command => 'tar xvfz phpmyadmin.tar.gz',
+    unless => 'test -d phpmyadmin && grep \'"/phpmyadmin/"\' phpmyadmin/config.inc.php',
+    cwd => '/var/www/pm_tools'
   }
+  
 
   class { 'pm::monitor::collect::apache': }
 }

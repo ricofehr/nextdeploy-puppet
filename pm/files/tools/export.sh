@@ -9,7 +9,8 @@ FTPPASSWD=''
 URI=''
 BRANCHS=('default')
 FTPHOST='nextdeploy'
-DOCROOT="$(pwd)/server"
+PATHURI="server"
+DOCROOT="$(pwd)/"
 
 # display helpn all of this parametes are setted during vm install
 posthelp() {
@@ -17,14 +18,15 @@ posthelp() {
 Usage: $0 [options]
 
 -h                this is some help text.
---framework xxxx  framework of the project. choices between symfony2, drupal, wordpress, static (default)
+--framework xxxx  framework targetting
+--path xxxx       uniq path for the framework
 --ftpuser xxxx    ftp user on nextdeploy ftp server
 --ftppasswd xxxx  ftp password on nextdeploy ftp server
 --ftphost xxxx    override nextdeploy ftp host
 --ismysql x       1/0 if mysql-server present (default is 0)
 --ismongo x       1/0 if mysql-server present (default is 0)
 --branchs xxxx    set branch(s) destination for export
---uri xxxx        main uri of the website (used by wordpress export)
+--uri xxxx        uri of the website
 EOF
 
 exit 0
@@ -64,6 +66,11 @@ while (($# > 0)); do
       ISMONGO="$1"
       shift
       ;;
+    --path)
+      shift
+      PATHURI="$1"
+      shift
+      ;;
     --uri)
       shift
       URI="$1"
@@ -83,6 +90,8 @@ while (($# > 0)); do
       ;;
   esac
 done
+
+DOCROOT="${DOCROOT}${PATHURI}"
 
 # drupal actions
 postdrupal() {
@@ -149,7 +158,7 @@ exportsql() {
   mkdir /tmp/dump
 
   pushd /tmp/dump > /dev/null
-  echo "show databases" | mysql -u s_bdd -ps_bdd | grep -v -e "^Database$" | grep -v -e "^information_schema$" | while read dbname; do
+  echo "show databases" | mysql -u s_bdd -ps_bdd | grep -v -e "^Database$" | grep -v -e "^information_schema$" | grep "${PATHURI}" | while read dbname; do
     mysqldump -u s_bdd -ps_bdd $dbname > ${dbname}.sql
     [[ "$FRAMEWORK" = 'wordpress' ]] && sed -i "s;$URI;ndwpuri;g" ${dbname}.sql
     gzip ${dbname}.sql
@@ -175,7 +184,7 @@ exportmongo() {
   mkdir /tmp/dump
 
   pushd /tmp/dump > /dev/null
-  echo "show dbs" | mongo --quiet | grep -v "local" | sed "s; .*$;;" | while read dbname; do
+  echo "show dbs" | mongo --quiet | grep -v "local" | grep "${PATHURI}" | sed "s; .*$;;" | while read dbname; do
     mongodump --db $dbname
     pushd dump >/dev/null
     tar cvfz ${dbname}.tar.gz $dbname
@@ -213,12 +222,13 @@ assetsarchive() {
   pushd /tmp/assets > /dev/null
   if (( $? == 0 )); then
     rsync -av --exclude config_* --exclude css --exclude js --exclude styles --exclude php ${destfolder}/ .
+    rm -f assets.tar.gz
     tar cvfz assets.tar.gz *
     if (( $? == 0 )); then
       for branch in ${BRANCHS[@]}; do
-        mv assets.tar.gz "${branch}_assets.tar.gz"
-        ncftpput -S .tmp -u $FTPUSER -p $FTPPASSWD $FTPHOST assets/ "${branch}_assets.tar.gz"
-        mv "${branch}_assets.tar.gz" assets.tar.gz
+        mv assets.tar.gz "${branch}_${PATHURI}_assets.tar.gz"
+        ncftpput -S .tmp -u $FTPUSER -p $FTPPASSWD $FTPHOST assets/ "${branch}_${PATHURI}_assets.tar.gz"
+        mv "${branch}_${PATHURI}_assets.tar.gz" assets.tar.gz
       done
 
       # test if default exist

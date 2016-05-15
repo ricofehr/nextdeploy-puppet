@@ -151,7 +151,7 @@ class pm::monitor::collect::redis {
 # Eric Fehr <ricofehr@nextdeploy.io>
 #
 class pm::monitor::collect::mysql {
-  collectd::plugin::mysql::database { 's_bdd':
+  collectd::plugin::mysql::database { 'server':
     host        => 'localhost',
     username    => 'root',
     password    => '',

@@ -9,7 +9,7 @@
 #
 class pm::nodejs {
   $node_version = hiera('node_version', '4.x')
-  
+
   # nodejs and ember_build prerequisites
   class { '::nodejs':
     repo_url_suffix => "${node_version}"
@@ -23,7 +23,7 @@ class pm::nodejs {
   package { ['pm2', 'grunt-cli', 'grunt', 'bower', 'gulp']:
     ensure   => present,
     provider => 'npm',
-    before => Exec['npmsh']
+    before => File['/usr/local/bin/npm.sh']
   }
 
   exec { 'nodejs-aptupdate':

@@ -23,7 +23,7 @@ class pm::base::apt {
   } ->
 
   exec { "puppethour":
-    command => "echo $(date +%l) > /tmp/puppethour"
+    command => 'echo "$(date +%l)" > /tmp/puppethour'
   }
 }
 
@@ -114,7 +114,7 @@ LC_ALL=en_US.UTF-8",
     managehome => 'true',
     shell => '/bin/bash'
   }
-  -> 
+  ->
 
   # exec usermod instead of User reference beacause weird puppet bug into trusty
   exec { 'changepasswd':
@@ -186,6 +186,18 @@ LC_ALL=en_US.UTF-8",
   file_line { 'sudo_rule_loadkeys':
     path => '/etc/sudoers',
     line => 'modem ALL=(ALL) NOPASSWD: /bin/loadkeys',
+  } ->
+
+  # ensure modem user can launch puppet update
+  file_line { 'sudo_puppet_agent':
+    path => '/etc/sudoers',
+    line => 'Cmnd_Alias PUPPETAGENT = /usr/bin/puppet agent -t',
+  } ->
+
+  # ensure modem user can launch puppet update
+  file_line { 'sudo_puppet_agent2':
+    path => '/etc/sudoers',
+    line => 'modem ALL=(ALL) NOPASSWD: PUPPETAGENT',
   } ->
 
   # change layout at login
