@@ -227,10 +227,9 @@ class pm::deploy::postinstall {
     user => 'root'
   } ->
 
-  exec { 'localuris':
-    command => "echo '127.0.1.1 ${line_host}' >> /etc/hosts",
-    creates => '/home/modem/.postinstall',
-    user => 'root'
+  file_line { 'localuris':
+    path => '/etc/hosts',
+    line => "127.0.1.1 ${line_host}",
   } ->
 
   exec { 'restartvarnish_postinstall':
