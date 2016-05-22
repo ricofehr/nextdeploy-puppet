@@ -176,7 +176,7 @@ LC_ALL=en_US.UTF-8",
   exec { 'gitconfigemail':
     command => "git config --global user.email ${email}",
     environment => ["HOME=/home/modem"],
-    creates => '/home/modem/.gitconfig',
+    unless => "grep ${email} /home/modem/.gitconfig",
     require => Package['git-core'],
     user => 'modem',
     cwd => '/home/modem'
