@@ -16,6 +16,8 @@ define pm::uri(
   $ftpuser = hiera('ftpuser', 'nextdeploy')
   $ftppasswd = hiera('ftppasswd', 'nextdeploy')
   $ismongo = hiera('ismongo', 0)
+  $isbackup = hiera('isbackup', 0)
+  $vmname = hiera('name', '')
   $override = hiera('override', 'None')
   $project = hiera('project', '')
 
@@ -228,6 +230,24 @@ define pm::uri(
     user => 'modem',
     group => 'www-data',
     creates => "/home/modem/.deploy${path}"
+  }
+
+  if $isbackup == 1 {
+    exec { "backupsh-${path}":
+      command => "backup.sh --uri ${absolute} --path ${path} --framework ${framework} --ftpuser ${ftpuser} --ftppasswd ${ftppasswd} --ismysql ${ismysql} --ismongo ${ismongo} --vmname ${vmname} >>/home/modem/backup.log 2>&1",
+      timeout => 14400,
+      cwd => "${docrootgit}",
+      user => 'modem',
+      group => 'www-data',
+      unless => 'test -f /tmp/backupday && test "$(date +%u)" = "$(cat /tmp/backupday)"',
+      require => [ File['/usr/local/bin/backup.sh'], Exec["importsh-${path}"] ]
+    } ->
+
+    exec { "lockbackup-${path}":
+      command => "date +%u > /tmp/backupday",
+      unless => 'test -f /tmp/backupday && test "$(date +%u)" = "$(cat /tmp/backupday)"',
+      before => Exec["touchdeploy-${path}"]
+    }
   }
 }
 

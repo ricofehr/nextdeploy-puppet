@@ -90,6 +90,13 @@ class pm::deploy::vhost {
     mode => '0755'
   } ->
 
+  file { '/usr/local/bin/backup.sh':
+    source => 'puppet:///modules/pm/tools/backup.sh',
+    owner => 'modem',
+    group => 'www-data',
+    mode => '0755'
+  } ->
+
   file { '/usr/local/bin/refreshcommit.sh':
     source => 'puppet:///modules/pm/tools/refreshcommit.sh',
     owner => 'modem',
