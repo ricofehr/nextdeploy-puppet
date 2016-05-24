@@ -235,7 +235,7 @@ case "$FRAMEWORK" in
   "symfony"*)
     postsymfony2
     ;;
-  "wordpress")
+  "wordpress"*)
     postwordpress
     ;;
   *)
