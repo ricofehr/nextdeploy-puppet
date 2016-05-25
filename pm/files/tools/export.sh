@@ -160,7 +160,7 @@ exportsql() {
   pushd /tmp/dump > /dev/null
   echo "show databases" | mysql -u s_bdd -ps_bdd | grep -v -e "^Database$" | grep -v -e "^information_schema$" | grep "${PATHURI}" | while read dbname; do
     mysqldump -u s_bdd -ps_bdd $dbname > ${dbname}.sql
-    [[ "$FRAMEWORK" = 'wordpress' ]] && sed -i "s;$URI;ndwpuri;g" ${dbname}.sql
+    [[ "$FRAMEWORK" = 'wordpress'* ]] && sed -i "s;$URI;ndwpuri;g" ${dbname}.sql
     gzip ${dbname}.sql
 
     for branch in ${BRANCHS[@]}; do
