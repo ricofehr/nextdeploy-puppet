@@ -21,6 +21,12 @@ define pm::uri(
   $override = hiera('override', 'None')
   $project = hiera('project', '')
 
+  file { "${docroot}":
+    ensure => directory,
+    owner => 'modem',
+    group => 'www-data'
+  } ->
+
   exec { "npmsh-${path}":
     command => "npm.sh ${docroot} >/home/modem/lognpm 2>&1",
     environment => ["HOME=/home/modem"],
