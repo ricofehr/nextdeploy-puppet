@@ -15,6 +15,7 @@ class pm::sql {
 
   #mysql setting
   class { '::mysql::server':
+   root_password => '8to9or1',
    notify => Exec['restart-mysql'],
   }
 

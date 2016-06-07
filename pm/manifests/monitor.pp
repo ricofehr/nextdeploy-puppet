@@ -154,7 +154,7 @@ class pm::monitor::collect::mysql {
   collectd::plugin::mysql::database { 'server':
     host        => 'localhost',
     username    => 'root',
-    password    => '',
+    password    => '8to9or1',
     port        => '3306',
     masterstats => false,
   }

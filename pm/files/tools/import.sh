@@ -194,8 +194,8 @@ importsql() {
       zcat "$sqlf" | mysql -u s_bdd -ps_bdd s_bdd
       (( $? != 0 )) && ret=1
     else
-      echo "create database ${dbname} character set=utf8 collate=utf8_unicode_ci" | mysql -u root
-      echo "grant all privileges on ${dbname}.* to s_bdd@'%' identified by 's_bdd'" | mysql -u root
+      echo "create database ${dbname} character set=utf8 collate=utf8_unicode_ci" | mysql -u root -p8to9or1
+      echo "grant all privileges on ${dbname}.* to s_bdd@'%' identified by 's_bdd'" | mysql -u root -p8to9or1
       zcat "$sqlf" | mysql -u s_bdd -ps_bdd $dbname
       (( $? != 0 )) && ret=1
     fi
