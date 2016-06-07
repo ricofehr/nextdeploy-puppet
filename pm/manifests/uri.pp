@@ -5,7 +5,8 @@ define pm::uri(
   $aliases = [],
   $framework,
   $rewrites = '',
-  $publicfolder = ''
+  $publicfolder = '',
+  $customvhost = ''
 ) {
 
   $docrootgit = hiera('docrootgit', '/var/www/html')
@@ -78,9 +79,6 @@ define pm::uri(
             override => ["${override}"],
             options => ['FollowSymLinks'],
             serveraliases => $aliases,
-            aliases => [
-              #{ alias => '/status_ok', path => '/var/www/status_ok' }
-            ],
             ensure => present,
             docroot_owner => 'modem',
             docroot_group => 'www-data',
@@ -92,6 +90,7 @@ define pm::uri(
               File['/etc/apache2/conf.d/tt.conf'],
               Exec['touchdeploygit']
             ],
+            custom_fragment => "${customvhost}",
             before => Service['varnish']
           }
       }
@@ -104,8 +103,7 @@ define pm::uri(
             options => ['Indexes', 'FollowSymLinks'],
             serveraliases => $aliases,
             aliases => [
-              { alias => '/robots.txt', path => '/var/www/robots.txt' },
-              #{ alias => '/status_ok', path => '/var/www/status_ok' }
+              { alias => '/robots.txt', path => '/var/www/robots.txt' }
             ],
             ensure => present,
             docroot_owner => 'modem',
@@ -118,6 +116,7 @@ define pm::uri(
               File['/etc/apache2/conf.d/tt.conf'],
               Exec['touchdeploygit']
             ],
+            custom_fragment => "${custom_vhost}",
             before => Service['varnish']
           }
       }
