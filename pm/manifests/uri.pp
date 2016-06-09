@@ -116,7 +116,7 @@ define pm::uri(
               File['/etc/apache2/conf.d/tt.conf'],
               Exec['touchdeploygit']
             ],
-            custom_fragment => "${custom_vhost}",
+            custom_fragment => "${customvhost}",
             before => Service['varnish']
           }
       }
