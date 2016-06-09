@@ -121,7 +121,7 @@ define pm::build::drupal(
 
   if $version == 8 {
     exec { "ci-cim-${path}":
-      command => 'drush -y cim',
+      command => '/usr/local/bin/drush -y cim >/dev/null 2>&1',
       cwd => "${docroot}",
       environment => ["HOME=/home/modem", "USER=modem", "LC_ALL=en_US.UTF-8", "LANG=en_US.UTF-8", "LANGUAGE=en_US.UTF-8", "SHELL=/bin/bash", "TERM=xterm"],
       require => Exec["ci-composersh-${path}"],
@@ -130,7 +130,7 @@ define pm::build::drupal(
   }
 
   exec { "ci-updb-${path}":
-    command => 'drush updb -y',
+    command => '/usr/local/bin/drush updb -y >/dev/null 2>&1',
     cwd => "${docroot}",
     environment => ["HOME=/home/modem", "USER=modem", "LC_ALL=en_US.UTF-8", "LANG=en_US.UTF-8", "LANGUAGE=en_US.UTF-8", "SHELL=/bin/bash", "TERM=xterm"],
     require => Exec["ci-composersh-${path}"]
@@ -138,14 +138,14 @@ define pm::build::drupal(
 
   if $version == 8 {
     exec { "ci-cr-${path}":
-      command => 'drush -y cr',
+      command => '/usr/local/bin/drush -y cr >/dev/null 2>&1',
       cwd => "${docroot}",
       environment => ["HOME=/home/modem", "USER=modem", "LC_ALL=en_US.UTF-8", "LANG=en_US.UTF-8", "LANGUAGE=en_US.UTF-8", "SHELL=/bin/bash", "TERM=xterm"],
       require => Exec["ci-updb-${path}"]
     }
   } else {
     exec { "ci-cc-${path}":
-      command => 'drush -y cc all',
+      command => 'drush -y cc all >/dev/null 2>&1',
       cwd => "${docroot}",
       environment => ["HOME=/home/modem", "USER=modem", "LC_ALL=en_US.UTF-8", "LANG=en_US.UTF-8", "LANGUAGE=en_US.UTF-8", "SHELL=/bin/bash", "TERM=xterm"],
       require => Exec["ci-updb-${path}"]

@@ -15,7 +15,7 @@ class pm::update {
   $docroot = hiera('docrootgit', '/var/www/html')
 
   exec { 'recordcommit':
-    command => 'git rev-parse HEAD > /tmp/commithash',
+    command => 'git rev-parse HEAD > /tmp/commithash1',
     user => 'modem',
     cwd => "${docroot}"
   } ->
@@ -42,7 +42,7 @@ class pm::update {
   create_resources("pm::build", $uris_params, { require => Exec['recordcommit2'], before => Exec['deletecommithashs'] })
 
   exec { 'deletecommithashs':
-    command => 'rm -f /tmp/commithash /tmp/commithash2',
+    command => 'rm -f /tmp/commithash1 /tmp/commithash2',
     user => 'modem',
     cwd => "${docroot}"
   }
