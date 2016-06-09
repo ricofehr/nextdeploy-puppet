@@ -123,6 +123,7 @@ define pm::build::drupal(
     exec { "ci-cim-${path}":
       command => 'drush -y cim',
       cwd => "${docroot}",
+      environment => ["HOME=/home/modem", "USER=modem", "LC_ALL=en_US.UTF-8", "LANG=en_US.UTF-8", "LANGUAGE=en_US.UTF-8", "SHELL=/bin/bash", "TERM=xterm"],
       require => Exec["ci-composersh-${path}"],
       before => Exec["ci-updb-${path}"]
     }
@@ -131,6 +132,7 @@ define pm::build::drupal(
   exec { "ci-updb-${path}":
     command => 'drush updb -y',
     cwd => "${docroot}",
+    environment => ["HOME=/home/modem", "USER=modem", "LC_ALL=en_US.UTF-8", "LANG=en_US.UTF-8", "LANGUAGE=en_US.UTF-8", "SHELL=/bin/bash", "TERM=xterm"],
     require => Exec["ci-composersh-${path}"]
   }
 
@@ -138,12 +140,14 @@ define pm::build::drupal(
     exec { "ci-cr-${path}":
       command => 'drush -y cr',
       cwd => "${docroot}",
+      environment => ["HOME=/home/modem", "USER=modem", "LC_ALL=en_US.UTF-8", "LANG=en_US.UTF-8", "LANGUAGE=en_US.UTF-8", "SHELL=/bin/bash", "TERM=xterm"],
       require => Exec["ci-updb-${path}"]
     }
   } else {
     exec { "ci-cc-${path}":
       command => 'drush -y cc all',
       cwd => "${docroot}",
+      environment => ["HOME=/home/modem", "USER=modem", "LC_ALL=en_US.UTF-8", "LANG=en_US.UTF-8", "LANGUAGE=en_US.UTF-8", "SHELL=/bin/bash", "TERM=xterm"],
       require => Exec["ci-updb-${path}"]
     }
   }
@@ -225,12 +229,14 @@ define pm::build::nodejs(
     command => "pm2 stop -f ${path}-app",
     onlyif => 'test -f app.js',
     cwd => "${docroot}",
+    environment => $envvars,
     require => [ Exec["ci-npmsh-${path}"] ],
   } ->
 
   exec { "ci-pm2stop_server-${path}":
     command => "pm2 stop -f ${path}-server",
     onlyif => 'test -f server.js',
+    environment => $envvars,
     cwd => "${docroot}"
   }
 
@@ -268,14 +274,16 @@ define pm::build::reactjs(
   exec { "ci-pm2stop_server_bin-${path}":
     command => "pm2 stop -f ${path}-server",
     onlyif => 'test -f bin/server.js',
+    environment => $envvars,
     cwd => "${docroot}",
     require => [ Exec["ci-npmsh-${path}"] ]
   } ->
 
   # reactjs start
   exec { "ci-pm2stop_api_bin-${path}":
-    command => "pm2 stop ${path}-api",
+    command => "pm2 stop -f ${path}-api",
     cwd => "${docroot}",
+    environment => $envvars,
     onlyif => 'test -f bin/api.js'
   } ->
 
