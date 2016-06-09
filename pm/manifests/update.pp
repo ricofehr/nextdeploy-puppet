@@ -39,5 +39,11 @@ class pm::update {
   }
 
   $uris_params = hiera('uris')
-  create_resources("pm::build", $uris_params, { require => Exec['recordcommit2'] })
+  create_resources("pm::build", $uris_params, { require => Exec['recordcommit2'], before => Exec['deletecommithashs'] })
+
+  exec { 'deletecommithashs':
+    command => 'rm -f /tmp/commithash /tmp/commithash2',
+    user => 'modem',
+    cwd => "${docroot}"
+  }
 }
