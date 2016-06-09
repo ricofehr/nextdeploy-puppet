@@ -191,7 +191,7 @@ define pm::uri(
         }
       }
 
-      'nodej': {
+      'nodejs': {
         pm::uri::nodejs { "${project}${path}":
           path => "${path}",
           envvars => $envvars,

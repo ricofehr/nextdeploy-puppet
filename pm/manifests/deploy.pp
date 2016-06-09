@@ -154,6 +154,11 @@ class pm::deploy::vhost {
 
   $uris_params = hiera('uris')
   create_resources("pm::uri", $uris_params, { require => Exec['touchdeploygit'], before => Exec['hosts_writable'] })
+
+  $isci = hiera('isci', 0)
+  if $isci == 1 {
+    include pm::update
+  }
 }
 
 # == Class: pm::deploy::postinstall
