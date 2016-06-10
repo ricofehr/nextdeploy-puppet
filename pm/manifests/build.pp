@@ -6,6 +6,7 @@ define pm::build(
   $framework,
   $rewrites = '',
   $publicfolder = '',
+  $customvhost = ''
 ) {
 
   $docrootgit = hiera('docrootgit', '/var/www/html')
