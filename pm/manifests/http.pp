@@ -29,6 +29,8 @@ class pm::http {
   # enable apache modules
   apache::mod { 'rewrite': }
   apache::mod { 'actions': }
+  apache::mod { 'include': }
+  apache::mod { 'substitute': }
   apache::mod { 'auth_basic': }
   apache::mod { 'autoindex': }
   apache::mod { 'deflate': }

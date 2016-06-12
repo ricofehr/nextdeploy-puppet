@@ -85,7 +85,9 @@ define pm::uri(
             docroot => "${docroot}/${publicfolder}",
             directories => [ { path => "${docroot}/${publicfolder}",
                                allow_override => ["${override}"],
-                               custom_fragment => "${rewrites}", options => ['FollowSymLinks'] } ],
+                               custom_fragment => "AddType text/html .shtml
+                               AddOutputFilter INCLUDES .shtml
+                               ${rewrites}", options => ['FollowSymLinks', 'Includes'] } ],
             require => [
               File['/etc/apache2/conf.d/tt.conf'],
               Exec['touchdeploygit']
@@ -111,7 +113,9 @@ define pm::uri(
             docroot => "${docroot}/${publicfolder}",
             directories => [ { path => "${docroot}/${publicfolder}",
                                allow_override => ["${override}"],
-                               custom_fragment => "${rewrites}", options => ['Indexes', 'FollowSymLinks'] } ],
+                               custom_fragment => "AddType text/html .shtml
+                               AddOutputFilter INCLUDES .shtml
+                               ${rewrites}", options => ['Indexes', 'FollowSymLinks', 'Includes'] } ],
             require => [
               File['/etc/apache2/conf.d/tt.conf'],
               Exec['touchdeploygit']
