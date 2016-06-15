@@ -33,7 +33,7 @@ class pm::http {
   apache::mod { 'substitute': }
   apache::mod { 'auth_basic': }
   apache::mod { 'autoindex': }
-  apache::mod { 'deflate': }
+  #apache::mod { 'deflate': }
   apache::mod { 'env': }
   apache::mod { 'expires': }
   apache::mod { 'headers': }
@@ -43,6 +43,10 @@ class pm::http {
   apache::mod { 'access_compat': }
   apache::mod { 'authn_core': }
   #apache::mod { 'authz_core': }
+
+  class { 'apache::mod::deflate':
+    types => [ 'text/html text/plain text/xml', 'text/css', 'application/x-javascript application/javascript application/ecmascript', 'application/rss+xml', 'application/json', 'application/vnd.ms-fontobject', 'font/truetype', 'font/woff', 'font/opentype' ]
+  }
 
   ::apache::vhost { 'defaultnd':
     ensure          => present,
