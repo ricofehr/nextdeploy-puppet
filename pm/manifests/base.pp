@@ -67,12 +67,18 @@ class pm::base {
         'links',
         'git-core',
         'ethtool',
-        'wget',
         'mailutils',
         'ncftp',
         'curl'
         ]:
         ensure => installed,
+  }
+
+  # ensure this packages are installed (ignore if they are already defined)
+  ensure_packages(['unzip', 'wget'])
+
+  package { 'wkhtmltopdf':
+    ensure => 'purged'
   }
 
   #env locals settings
