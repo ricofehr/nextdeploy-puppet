@@ -104,6 +104,13 @@ class pm::deploy::vhost {
     mode => '0755'
   } ->
 
+  file { '/usr/local/bin/findscripts.sh':
+    source => 'puppet:///modules/pm/tools/findscripts.sh',
+    owner => 'modem',
+    group => 'www-data',
+    mode => '0755'
+  } ->
+
   exec { 'touchdeploygit':
     command => 'touch /home/modem/.deploygit',
     creates => '/home/modem/.deploygit',
