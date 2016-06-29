@@ -20,7 +20,7 @@ done
 
 find . -maxdepth 6 -name Gruntfile.js | grep -v "node_modules" | while read GFILE; do
   pushd "${GFILE%/*}" >/dev/null
-  grunt build
+  grunt build --force
   popd >/dev/null
 done
 
