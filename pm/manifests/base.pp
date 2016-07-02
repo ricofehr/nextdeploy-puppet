@@ -188,6 +188,15 @@ LC_ALL=en_US.UTF-8",
     cwd => '/home/modem'
   } ->
 
+  exec { 'gitconfigusername':
+    command => "git config --global user.name nduser",
+    environment => ["HOME=/home/modem"],
+    unless => "grep nduser /home/modem/.gitconfig",
+    require => Package['git-core'],
+    user => 'modem',
+    cwd => '/home/modem'
+  } ->
+
   # ensure no-root can cahnge locale
   file_line { 'sudo_rule_loadkeys':
     path => '/etc/sudoers',
