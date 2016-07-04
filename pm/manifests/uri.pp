@@ -452,6 +452,12 @@ define pm::uri::symfony(
     cwd => "${docroot}"
   } ->
 
+  exec { "parameters_hostname-${path}":
+    command => "sed -i 's,base_hostname:.*$,base_hostname: ${absolute},' app/config/parameters.yml",
+    creates => "/home/modem/.deploy${path}",
+    cwd => "${docroot}"
+  } ->
+
   exec { "rmcachedev-${path}":
     command => 'rm -rf app/cache/dev',
     onlyif => 'test -d app/cache/dev',
