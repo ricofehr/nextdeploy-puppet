@@ -28,8 +28,19 @@ define pm::uri(
     group => 'www-data'
   } ->
 
+  exec { "gemsh-${path}":
+    command => "gem.sh ${docroot} >/home/modem/loggem${path} 2>&1",
+    environment => ["HOME=/home/modem"],
+    user => 'modem',
+    group => 'www-data',
+    cwd => '/home/modem',
+    creates => "/home/modem/.deploy${path}",
+    timeout => 1800,
+    require => Exec['touchdeploygit']
+  } ->
+
   exec { "npmsh-${path}":
-    command => "npm.sh ${docroot} >/home/modem/lognpm 2>&1",
+    command => "npm.sh ${docroot} >/home/modem/lognpm${path} 2>&1",
     environment => ["HOME=/home/modem"],
     user => 'modem',
     group => 'www-data',
@@ -40,7 +51,7 @@ define pm::uri(
   } ->
 
   exec { "composersh-${path}":
-    command => "composer.sh ${docroot} >/home/modem/logcomposer 2>&1",
+    command => "composer.sh ${docroot} >/home/modem/logcomposer${path} 2>&1",
     environment => ["HOME=/home/modem"],
     user => 'modem',
     group => 'www-data',
@@ -50,7 +61,7 @@ define pm::uri(
   } ->
 
   exec { "mvnsh-${path}":
-    command => "mvn.sh ${docroot} >/home/modem/logmvn 2>&1",
+    command => "mvn.sh ${docroot} >/home/modem/logmvn${path} 2>&1",
     environment => ["HOME=/home/modem"],
     user => 'modem',
     group => 'www-data',

@@ -26,6 +26,8 @@ done
 
 find . -maxdepth 6 -name gulpfile.js | grep -v "node_modules" | while read GFILE; do
   pushd "${GFILE%/*}" >/dev/null
+  ISSASS=$(find . -type d -regex '^.*vendor/bundle/.*bin$' | tail -n 1 | tr -d "\n" | sed "s;/bin;;")
+  [[ -n "$ISSASS" ]] && export PATH="${PATH}:${ISSASS}/bin" && export GEM_HOME="${ISSASS}"
   gulp build
   popd >/dev/null
 done

@@ -55,6 +55,13 @@ class pm::deploy::vhost {
     group => 'www-data'
   } ->
 
+  file { '/usr/local/bin/gem.sh':
+    source => 'puppet:///modules/pm/tools/gem.sh',
+    owner => 'modem',
+    group => 'www-data',
+    mode => '0755'
+  } ->
+
   file { '/usr/local/bin/npm.sh':
     source => 'puppet:///modules/pm/tools/npm.sh',
     owner => 'modem',

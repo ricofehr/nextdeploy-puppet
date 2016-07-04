@@ -75,7 +75,7 @@ class pm::base {
   }
 
   # ensure this packages are installed (ignore if they are already defined)
-  ensure_packages(['unzip', 'wget'])
+  ensure_packages(['unzip', 'wget', 'ruby-dev'])
 
   package { 'wkhtmltopdf':
     ensure => 'purged'
@@ -201,6 +201,12 @@ LC_ALL=en_US.UTF-8",
   file_line { 'sudo_rule_loadkeys':
     path => '/etc/sudoers',
     line => 'modem ALL=(ALL) NOPASSWD: /bin/loadkeys',
+  } ->
+
+  # ensure no-root can execute global gem
+  file_line { 'sudo_rule_gem':
+    path => '/etc/sudoers',
+    line => 'modem ALL=(ALL) NOPASSWD: /usr/bin/gem',
   } ->
 
   # ensure modem user can launch puppet update
