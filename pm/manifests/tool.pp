@@ -44,3 +44,16 @@ class pm::tool::wkhtmltopdf ($major = '0.12', $minor = '3') {
     onlyif => 'test -d /tmp/wkhtml'
   }
 }
+
+# == Class: pm::tool::phpapc
+#
+# Install apc
+#
+#
+# === Authors
+#
+# Eric Fehr <ricofehr@nextdeploy.io>
+#
+class pm::tool::phpapc {
+  ensure_packages(['php-apc'])
+}
