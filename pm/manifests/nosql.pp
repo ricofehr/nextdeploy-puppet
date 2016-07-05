@@ -47,7 +47,7 @@ class pm::nosql::mongo {
     onlyif => 'test -d /etc/apt'
   }
 
-  # ensure that apt-update is running before install nodejs package
+  # ensure that apt-update is running before install mongo package
   Apt::Source <| |> ~> Exec['mongo-aptupdate'] -> Package['mongodb-org-server']
 }
 
