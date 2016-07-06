@@ -578,7 +578,7 @@ define pm::uri::nodejs(
   }
 
   exec { "pm2start-${path}":
-    command => "pm2 start -f app.js --name '${path}-app'",
+    command => "pm2 start -f app.js --name '${path}-app' -i 0",
     onlyif => 'test -f app.js',
     environment => $envvars,
     cwd => "${docroot}",
@@ -587,7 +587,7 @@ define pm::uri::nodejs(
   } ->
 
   exec { "pm2start_server-${path}":
-    command => "pm2 start -f server.js --name '${path}-server'",
+    command => "pm2 start -f server.js --name '${path}-server' -i 0",
     onlyif => 'test -f server.js',
     environment => $envvars,
     cwd => "${docroot}",
@@ -611,7 +611,7 @@ define pm::uri::reactjs(
   }
 
   exec { "pm2start_server_bin-${path}":
-    command => "pm2 start -f bin/server.js --name '${path}-server'",
+    command => "pm2 start -f bin/server.js --name '${path}-server' -i 0",
     onlyif => 'test -f bin/server.js',
     environment => $envvars,
     cwd => "${docroot}",
@@ -621,7 +621,7 @@ define pm::uri::reactjs(
 
   # reactjs start
   exec { "pm2start_api_bin-${path}":
-    command => "pm2 start -f bin/api.js --name '${path}-api'",
+    command => "pm2 start -f bin/api.js --name '${path}-api' -i 0",
     environment => $envvars,
     cwd => "${docroot}",
     onlyif => 'test -f bin/api.js',
