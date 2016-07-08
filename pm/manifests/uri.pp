@@ -583,7 +583,7 @@ define pm::uri::nodejs(
     environment => $envvars,
     cwd => "${docroot}",
     require => [ Package['pm2'], Exec['touchdeploygit'] ],
-    unless => "test -f /home/modem/.pm2/pids/${path}-app-*.pid || test -f /tmp/.lockpuppet"
+    unless => "ls /home/modem/.pm2/pids/${path}-app-*.pid >/dev/null 2>&1 || test -f /tmp/.lockpuppet"
   } ->
 
   exec { "pm2start_server-${path}":
@@ -591,7 +591,7 @@ define pm::uri::nodejs(
     onlyif => 'test -f server.js',
     environment => $envvars,
     cwd => "${docroot}",
-    unless => "test -f /home/modem/.pm2/pids/${path}-server-*.pid || test -f /tmp/.lockpuppet"
+    unless => "ls /home/modem/.pm2/pids/${path}-server-*.pid >/dev/null 2>&1 || test -f /tmp/.lockpuppet"
   }
 }
 
@@ -616,7 +616,7 @@ define pm::uri::reactjs(
     environment => $envvars,
     cwd => "${docroot}",
     require => [ Package['pm2'], Exec['touchdeploygit'] ],
-    unless => "test -f /home/modem/.pm2/pids/${path}-server-*.pid || test -f /tmp/.lockpuppet"
+    unless => "ls /home/modem/.pm2/pids/${path}-server-*.pid >/dev/null 2>&1 || test -f /tmp/.lockpuppet"
   } ->
 
   # reactjs start
@@ -625,7 +625,7 @@ define pm::uri::reactjs(
     environment => $envvars,
     cwd => "${docroot}",
     onlyif => 'test -f bin/api.js',
-    unless => "test -f /home/modem/.pm2/pids/${path}-api-*.pid || test -f /tmp/.lockpuppet"
+    unless => "ls /home/modem/.pm2/pids/${path}-api-*.pid >/dev/null 2>&1 || test -f /tmp/.lockpuppet"
   }
 }
 
