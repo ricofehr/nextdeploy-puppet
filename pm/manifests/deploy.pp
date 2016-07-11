@@ -220,7 +220,7 @@ class pm::deploy::postinstall {
 
   exec { 'postinstall':
     command => "/bin/bash scripts/postinstall.sh ${vm_name}.os.${nextdeployuri} >/home/modem/postinstall.log 2>&1",
-    timeout => 7200,
+    timeout => 720000,
     creates => '/home/modem/.postinstall'
   } ->
 
