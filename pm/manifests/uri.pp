@@ -165,6 +165,7 @@ define pm::uri(
           pm::uri::symfony { "${project}${path}":
             version => 3,
             path => "${path}",
+            absolute => "${absolute}",
             require => [ Exec["composersh-${path}"], Exec["npmsh-${path}"], Mysql::Db["${path}"] ],
             before => [ Exec["importsh-${path}"] ]
           }
@@ -173,6 +174,7 @@ define pm::uri(
           pm::uri::symfony { "${project}${path}":
             version => 3,
             path => "${path}",
+            absolute => "${absolute}",
             require => [ Exec["composersh-${path}"], Exec["npmsh-${path}"] ],
             before => [ Exec["importsh-${path}"] ]
           }
@@ -628,6 +630,3 @@ define pm::uri::reactjs(
     unless => "ls /home/modem/.pm2/pids/${path}-api-*.pid >/dev/null 2>&1 || test -f /tmp/.lockpuppet"
   }
 }
-
-
-
