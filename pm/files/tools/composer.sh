@@ -14,9 +14,9 @@ find . -maxdepth 6 -name composer.json | grep -v "vendor" | while read GFILE; do
   if [[ -f composer.lock ]] || [[ "$PWD" =~ ^.*/html.*$ ]]; then
     [[ -f composer.phar ]] && rm -f composer.phar
     curl -sS https://getcomposer.org/installer | php
-    /usr/bin/php composer.phar install -n --prefer-dist --no-dev
+    /usr/bin/php composer.phar install -n --prefer-dist
     # if composer fails, sometimes is caused by github rates, sleep and try again
-    (( $? != 0 )) && sleep 20 && /usr/bin/php composer.phar install -n --prefer-dist --no-dev
+    (( $? != 0 )) && sleep 20 && /usr/bin/php composer.phar install -n --prefer-dist
     rm -f composer.phar
   fi
   popd >/dev/null
