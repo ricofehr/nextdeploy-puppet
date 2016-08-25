@@ -262,13 +262,13 @@ define pm::uri(
       cwd => "${docrootgit}",
       user => 'modem',
       group => 'www-data',
-      unless => 'test -f /tmp/backupday && test "$(date +%u)" = "$(cat /tmp/backupday)"',
+      unless => "test -f /tmp/backupday${path} && test \"\$(date +%u)\" = \"\$(cat /tmp/backupday${path})\"",
       require => [ File['/usr/local/bin/backup.sh'], Exec["importsh-${path}"] ]
     } ->
 
     exec { "lockbackup-${path}":
-      command => "date +%u > /tmp/backupday",
-      unless => 'test -f /tmp/backupday && test "$(date +%u)" = "$(cat /tmp/backupday)"',
+      command => "date +%u > /tmp/backupday${path}",
+      unless => "test -f /tmp/backupday${path} && test \"\$(date +%u)\" = \"\$(cat /tmp/backupday${path})\"",
       before => Exec["touchdeploy-${path}"]
     }
   }
