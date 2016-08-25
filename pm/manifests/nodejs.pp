@@ -20,7 +20,7 @@ class pm::nodejs {
     target => '/usr/bin/nodejs',
   }
   ->
-  package { ['pm2', 'grunt-cli', 'grunt', 'bower', 'gulp']:
+  package { ['pm2', 'grunt-cli', 'bower', 'gulp']:
     ensure   => present,
     provider => 'npm',
     before => File['/usr/local/bin/npm.sh']
