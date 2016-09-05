@@ -342,7 +342,7 @@ define pm::uri::drupal(
           user => 'root',
           creates => "/home/modem/.deploy${path}",
           cwd => "${docroot}",
-          require => Exec['site-install'],
+          require => Exec["site-install-${path}"],
           before => Exec["touchdeploy-${path}"]
         }
       }
@@ -352,7 +352,7 @@ define pm::uri::drupal(
           user => 'root',
           creates => "/home/modem/.deploy${path}",
           cwd => "${docroot}",
-          require => Exec['site-install'],
+          require => Exec["site-install-${path}"],
           before => Exec["touchdeploy-${path}"]
         }
       }
