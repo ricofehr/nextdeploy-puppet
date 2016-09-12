@@ -112,7 +112,7 @@ define pm::build::drupal(
 
   $docrootgit = hiera('docrootgit', '/var/www/html')
   $docroot = "${docrootgit}/${path}"
-  
+
   Exec {
     path => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/", "/usr/local/bin", "/opt/bin" ],
     user => 'modem',
@@ -303,6 +303,3 @@ define pm::build::reactjs(
     onlyif => 'test -f bin/api.js'
   }
 }
-
-
-

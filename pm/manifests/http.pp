@@ -150,7 +150,7 @@ Disallow: /'
     unless => 'test -d phpmyadmin && grep \'"/phpmyadmin/"\' phpmyadmin/config.inc.php',
     cwd => '/var/www/pm_tools'
   }
-  
+
 
   class { 'pm::monitor::collect::apache': }
 }

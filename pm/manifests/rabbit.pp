@@ -9,7 +9,7 @@
 #
 class pm::rabbit {
   #rabbit setting
-  class { 'rabbitmq': 
+  class { 'rabbitmq':
     package_gpg_key => "https://www.rabbitmq.com/rabbitmq-release-signing-key.asc"
   }
 
