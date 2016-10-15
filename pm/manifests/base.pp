@@ -75,7 +75,7 @@ class pm::base {
   }
 
   # ensure this packages are installed (ignore if they are already defined)
-  ensure_packages(['unzip', 'wget', 'ruby-dev'])
+  ensure_packages(['unzip', 'wget', 'ruby-dev', 'nmap'])
 
   package { 'wkhtmltopdf':
     ensure => 'purged'
