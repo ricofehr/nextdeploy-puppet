@@ -331,6 +331,7 @@ define pm::uri::drupal(
     environment => ["HOME=/home/modem", "USER=modem", "LC_ALL=en_US.UTF-8", "LANG=en_US.UTF-8", "LANGUAGE=en_US.UTF-8", "SHELL=/bin/bash", "TERM=xterm"],
     creates => "/home/modem/.deploy${path}",
     cwd => "${docroot}",
+    require => Package['php5-gd'],
     timeout => 3600
   }
 

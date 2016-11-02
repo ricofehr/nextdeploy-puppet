@@ -1,0 +1,731 @@
+#!/bin/bash
+
+PUPPETFOLDER="${PWD}"
+TSTAMP="$(date +%s)"
+TMPFOLDER="nd${TSTAMP}"
+NODE_VERSION='4.x'
+ISMYSQL=0
+ISMONGO=0
+ISWEB=1
+ISAUTH=1
+ISPROD=0
+ISCACHED=0
+ISCI=1
+ISBACKUP=0
+VARNISHV=3
+NAME="$((TSTAMP%100))-www-test-com"
+HTUSER='modem'
+HTPASSWD='modem'
+HTAUTH='bW9kZW06bW9kZW0='
+WEBENV='dev'
+HTOVERRIDE='None'
+MYSQLBDD=''
+PROJECT="www.test.com"
+OSNAME='Ubuntu1404'
+OSBOX='osvm-trusty2'
+OSLIST=('Ubuntu1404' 'Debian8' 'Ubuntu1604')
+FRAMEWORKSLIST=('drupal7' 'drupal8' 'symfony2' 'symfony3' 'wordpress' 'nodejs'
+                'reactjs' 'static' 'noweb' 'drupal8-reactjs' 'drupal8-symfony3'
+                'symfony2-static')
+CLASSESBEFORE=('pm::base::apt' 'pm::base' 'pm::mail' 'pm::monitor::collect'
+               'pm::hids::agent' 'pm::deploy::vhost')
+TECHNOS=()
+FRMTECHNOS=()
+CLASSESAFTER=('pm::deploy::postinstall')
+VMIP=''
+
+# Parse cmd options
+while (($# > 0)); do
+  case "$1" in
+    -o|--osname)
+      shift
+      OSNAME="$1"
+      shift
+      ;;
+    -t|--techno)
+      shift
+      # check if this techno is already in the list
+      for techno in "${TECHNOS[@]}"; do
+        if [[ "$techno" = "$1" ]]; then
+          break
+        fi
+      done
+      if [[ "$techno" != "$1" ]]; then
+         if  [[ "$techno" = "${TECHNOS[${#TECHNOS[@]}-1]}" ]]; then
+           TECHNOS+="$1"
+         fi
+      fi
+      shift
+      ;;
+    -f|--framework|--frameworks)
+      shift
+      FRAMEWORKS="$1"
+      shift
+      ;;
+    *)
+      nextdeployhelp
+      shift
+      ;;
+  esac
+done
+
+# Ensure FRAMEWORKS is correctly setted
+while ((1)); do
+  if [[ -z "${FRAMEWORKS}" ]]; then
+    echo "Which Framework(s) for your (web)app ?"
+    for frm in "${FRAMEWORKSLIST[@]}"; do
+      echo "$frm"
+    done
+    read FRAMEWORKS
+  fi
+
+  for frm in "${FRAMEWORKSLIST[@]}"; do
+    if [[ "$frm" = "${FRAMEWORKS}" ]]; then
+      break
+    fi
+  done
+
+  if [[ "$frm" = "${FRAMEWORKS}" ]]; then
+    break
+  fi
+
+  FRAMEWORKS=""
+done
+
+# Enable uris and default technos-list for frameworks targeted
+case $FRAMEWORKS in
+  drupal7)
+    FRMTECHNOS=('pm::nodejs' 'pm::http' 'pm::varnish' 'pm::sql' 'pm::nosql::memcache')
+    URIS="uris:
+  ${NAME}-${TSTAMP}.os.nextdeploy.local:
+    path: server
+    aliases:
+      - bo.${NAME}-${TSTAMP}.os.nextdeploy.local
+    framework: drupal7
+    publicfolder: ''
+    rewrites: \"RewriteEngine On\nRewriteCond %%{literal('%')}{REQUEST_FILENAME} !-f\nRewriteCond %%{literal('%')}{REQUEST_FILENAME} !-d\nRewriteCond %%{literal('%')}{REQUEST_URI} !=/favicon.ico\nRewriteRule ^ index.php [L]\n\"
+    customvhost: ''"
+    BACKENDS="pm::varnish::backends:
+  - absolute: ${NAME}-${TSTAMP}.os.nextdeploy.local
+    path: server
+    port: 8080
+    aliases:
+      - bo.${NAME}-${TSTAMP}.os.nextdeploy.local
+    ipfilter: ''"
+    ;;
+  drupal8)
+    FRMTECHNOS=('pm::nodejs' 'pm::http' 'pm::varnish' 'pm::sql' 'pm::nosql::memcache')
+    URIS="uris:
+  ${NAME}-${TSTAMP}.os.nextdeploy.local:
+    path: server
+    aliases:
+      - bo.${NAME}-${TSTAMP}.os.nextdeploy.local
+    framework: drupal8
+    publicfolder: ''
+    rewrites: \"RewriteEngine On\nRewriteCond %%{literal('%')}{REQUEST_FILENAME} !-f\nRewriteCond %%{literal('%')}{REQUEST_FILENAME} !-d\nRewriteCond %%{literal('%')}{REQUEST_URI} !=/favicon.ico\nRewriteRule ^ index.php [L]\n\"
+    customvhost: ''"
+    BACKENDS="pm::varnish::backends:
+  - absolute: ${NAME}-${TSTAMP}.os.nextdeploy.local
+    path: server
+    port: 8080
+    aliases:
+      - bo.${NAME}-${TSTAMP}.os.nextdeploy.local
+    ipfilter: ''"
+    ;;
+  symfony2)
+    FRMTECHNOS=('pm::nodejs' 'pm::http' 'pm::varnish' 'pm::sql')
+    URIS="uris:
+  ${NAME}-${TSTAMP}.os.nextdeploy.local:
+    path: server
+    aliases:
+      - admin.${NAME}-${TSTAMP}.os.nextdeploy.local
+    framework: symfony2
+    publicfolder: 'web/'
+    rewrites: \"RewriteEngine On\nRewriteRule ^/?$ /app_dev.php [L]\nRewriteCond %%{literal('%')}{REQUEST_URI} !=/server-status\nRewriteCond %%{literal('%')}{REQUEST_FILENAME} !-f\nRewriteCond %%{literal('%')}{REQUEST_FILENAME} !-d\nRewriteRule .* /app_dev.php [L]\n\"
+    customvhost: ''"
+    BACKENDS="pm::varnish::backends:
+  - absolute: ${NAME}-${TSTAMP}.os.nextdeploy.local
+    path: server
+    port: 8080
+    aliases:
+      - admin.${NAME}-${TSTAMP}.os.nextdeploy.local
+    ipfilter: ''"
+    ;;
+  symfony3)
+    FRMTECHNOS=('pm::nodejs' 'pm::http' 'pm::varnish' 'pm::sql')
+    URIS="uris:
+  ${NAME}-${TSTAMP}.os.nextdeploy.local:
+    path: server
+    aliases:
+      - admin.${NAME}-${TSTAMP}.os.nextdeploy.local
+    framework: symfony3
+    publicfolder: 'web/'
+    rewrites: \"RewriteEngine On\nRewriteRule ^/?$ /app_dev.php [L]\nRewriteCond %%{literal('%')}{REQUEST_URI} !=/server-status\nRewriteCond %%{literal('%')}{REQUEST_FILENAME} !-f\nRewriteCond %%{literal('%')}{REQUEST_FILENAME} !-d\nRewriteRule .* /app_dev.php [L]\n\"
+    customvhost: ''"
+    BACKENDS="pm::varnish::backends:
+  - absolute: ${NAME}-${TSTAMP}.os.nextdeploy.local
+    path: server
+    port: 8080
+    aliases:
+      - admin.${NAME}-${TSTAMP}.os.nextdeploy.local
+    ipfilter: ''"
+    ;;
+  wordpress)
+    FRMTECHNOS=('pm::nodejs' 'pm::http' 'pm::varnish' 'pm::sql')
+    URIS="uris:
+  ${NAME}-${TSTAMP}.os.nextdeploy.local:
+    path: server
+    framework: wordpress-4.5.2
+    publicfolder: ''
+    rewrites: \"RewriteEngine On\nRewriteRule ^/?$ /index.php [L]\nRewriteCond %%{literal('%')}{REQUEST_URI} !=/server-status\nRewriteCond %%{literal('%')}{REQUEST_FILENAME} !-f\nRewriteCond %%{literal('%')}{REQUEST_FILENAME} !-d\nRewriteRule .* /index.php [L]\n\"
+    customvhost: ''"
+    BACKENDS="pm::varnish::backends:
+  - absolute: ${NAME}-${TSTAMP}.os.nextdeploy.local
+    path: server
+    port: 8080
+    ipfilter: ''"
+    ;;
+  nodejs)
+    ISWEB=0
+    FRMTECHNOS=('pm::nodejs' 'pm::varnish')
+    URIS="uris:
+  ${NAME}-${TSTAMP}.os.nextdeploy.local:
+    path: nodejs
+    envvars:
+      - HOME=/home/modem
+      - PORT=3100
+      - NODE_PATH=./src
+    framework: nodejs
+    publicfolder: ''
+    rewrites: ''
+    customvhost: ''"
+    BACKENDS="pm::varnish::backends:
+  - absolute: ${NAME}-${TSTAMP}.os.nextdeploy.local
+    path: nodejs
+    port: 3100
+    ipfilter: ''"
+    ;;
+  reactjs)
+    ISWEB=0
+    FRMTECHNOS=('pm::nodejs' 'pm::varnish')
+    URIS="uris:
+  ${NAME}-${TSTAMP}.os.nextdeploy.local:
+    path: nodejs
+    envvars:
+      - HOME=/home/modem
+      - PORT=3100
+      - NODE_PATH=./src
+    framework: reactjs
+    publicfolder: ''
+    rewrites: ''
+    customvhost: ''"
+    BACKENDS="pm::varnish::backends:
+  - absolute: ${NAME}-${TSTAMP}.os.nextdeploy.local
+    path: nodejs
+    port: 3100
+    ipfilter: ''"
+    ;;
+  static)
+    FRMTECHNOS=('pm::nodejs' 'pm::http' 'pm::varnish')
+    URIS="uris:
+  ${NAME}-${TSTAMP}.os.nextdeploy.local:
+    path: html
+    framework: static
+    publicfolder: ''
+    rewrites: ''
+    customvhost: ''"
+    BACKENDS="pm::varnish::backends:
+  - absolute: ${NAME}-${TSTAMP}.os.nextdeploy.local
+    path: html
+    port: 8080
+    ipfilter: ''"
+    ;;
+  noweb)
+    ISWEB=0
+    FRMTECHNOS=('pm::java' 'pm::sql' 'pm::nosql::mongo')
+    URIS="uris:
+  ${NAME}-${TSTAMP}.os.nextdeploy.local:
+    path: java
+    framework: noweb
+    publicfolder: ''
+    rewrites: \"\""
+    BACKENDS="pm::varnish::backends:
+  - absolute: ${NAME}-${TSTAMP}.os.nextdeploy.local
+    path: java
+    port: 8080
+    ipfilter: ''"
+    ;;
+  drupal8-reactjs)
+    FRMTECHNOS=('pm::nodejs' 'pm::http' 'pm::varnish' 'pm::sql' 'pm::nosql::memcache')
+    URIS="uris:
+  api.${NAME}-${TSTAMP}.os.nextdeploy.local:
+    path: server
+    aliases:
+      - bo.${NAME}-${TSTAMP}.os.nextdeploy.local
+    framework: drupal8
+    publicfolder: ''
+    rewrites: \"RewriteEngine On\nRewriteCond %%{literal('%')}{REQUEST_FILENAME} !-f\nRewriteCond %%{literal('%')}{REQUEST_FILENAME} !-d\nRewriteCond %%{literal('%')}{REQUEST_URI} !=/favicon.ico\nRewriteRule ^ index.php [L]\n\"
+    customvhost: ''
+  ${NAME}-${TSTAMP}.os.nextdeploy.local:
+    path: nodejs
+    envvars:
+      - HOME=/home/modem
+      - PORT=3100
+      - NODE_PATH=./src
+      - DRUPALHOST=api.${NAME}-${TSTAMP}.os.nextdeploy.local
+      - DRUPALPORT=80
+    framework: reactjs
+    publicfolder: ''
+    rewrites: ''
+    customvhost: ''"
+    BACKENDS="pm::varnish::backends:
+  - absolute: api.${NAME}-${TSTAMP}.os.nextdeploy.local
+    path: server
+    port: 8080
+    aliases:
+      - bo.${NAME}-${TSTAMP}.os.nextdeploy.local
+    ipfilter: ''
+  - absolute: ${NAME}-${TSTAMP}.os.nextdeploy.local
+    path: nodejs
+    port: 3100
+    ipfilter: ''"
+    ;;
+  drupal8-symfony3)
+    FRMTECHNOS=('pm::nodejs' 'pm::http' 'pm::varnish' 'pm::sql' 'pm::nosql::memcache')
+    URIS="uris:
+  api.${NAME}-${TSTAMP}.os.nextdeploy.local:
+    path: drupal
+    aliases:
+      - bo.${NAME}-${TSTAMP}.os.nextdeploy.local
+    framework: drupal8
+    publicfolder: ''
+    rewrites: \"RewriteEngine On\nRewriteCond %%{literal('%')}{REQUEST_FILENAME} !-f\nRewriteCond %%{literal('%')}{REQUEST_FILENAME} !-d\nRewriteCond %%{literal('%')}{REQUEST_URI} !=/favicon.ico\nRewriteRule ^ index.php [L]\n\"
+    customvhost: ''
+  ${NAME}-${TSTAMP}.os.nextdeploy.local:
+    path: symfony
+    framework: symfony3
+    publicfolder: 'web/'
+    rewrites: \"RewriteEngine On\nRewriteRule ^/?$ /app_dev.php [L]\nRewriteCond %%{literal('%')}{REQUEST_URI} !=/server-status\nRewriteCond %%{literal('%')}{REQUEST_FILENAME} !-f\nRewriteCond %%{literal('%')}{REQUEST_FILENAME} !-d\nRewriteRule .* /app_dev.php [L]\n\"
+    customvhost: ''"
+    BACKENDS="pm::varnish::backends:
+  - absolute: api.${NAME}-${TSTAMP}.os.nextdeploy.local
+    path: drupal
+    port: 8080
+    aliases:
+      - bo.${NAME}-${TSTAMP}.os.nextdeploy.local
+    ipfilter: ''
+  - absolute: ${NAME}-${TSTAMP}.os.nextdeploy.local
+    path: symfony
+    port: 8080
+    ipfilter: ''"
+    ;;
+  symfony2-static)
+    FRMTECHNOS=('pm::nodejs' 'pm::http' 'pm::varnish' 'pm::sql')
+    URIS="uris:
+  ${NAME}-${TSTAMP}.os.nextdeploy.local:
+    path: server
+    aliases:
+      - admin.${NAME}-${TSTAMP}.os.nextdeploy.local
+    framework: symfony2
+    publicfolder: 'web/'
+    rewrites: \"RewriteEngine On\nRewriteRule ^/?$ /app_dev.php [L]\nRewriteCond %%{literal('%')}{REQUEST_URI} !=/server-status\nRewriteCond %%{literal('%')}{REQUEST_FILENAME} !-f\nRewriteCond %%{literal('%')}{REQUEST_FILENAME} !-d\nRewriteRule .* /app_dev.php [L]\n\"
+    customvhost: ''
+  html.${NAME}-${TSTAMP}.os.nextdeploy.local:
+    path: html
+    framework: static
+    publicfolder: ''
+    rewrites: ''
+    customvhost: ''"
+    BACKENDS="pm::varnish::backends:
+  - absolute: ${NAME}-${TSTAMP}.os.nextdeploy.local
+    path: server
+    port: 8080
+    aliases:
+      - admin.${NAME}-${TSTAMP}.os.nextdeploy.local
+    ipfilter: ''
+  - absolute: html.${NAME}-${TSTAMP}.os.nextdeploy.local
+    path: html
+    port: 8080
+    ipfilter: ''"
+    ;;
+esac
+
+# define ismysql and ismongo
+echo "${FRMTECHNOS[*]}" | grep -i sql >/dev/null 2>&1 && ISMYSQL=1
+echo "${TECHNOS[*]}" | grep -i sql >/dev/null 2>&1 && ISMYSQL=1
+echo "${FRMTECHNOS[*]}" | grep -i mongo >/dev/null 2>&1 && ISMONGO=1
+echo "${TECHNOS[*]}" | grep -i mongo >/dev/null 2>&1 && ISMONGO=1
+
+# Ensure OSNAME is correctly setted
+while ((1)); do
+  if [[ -z "${OSNAME}" ]]; then
+    echo "Which System for your (web)app ?"
+    for os in "${OSLIST[@]}"; do
+      echo "$os"
+    done
+    read OSNAME
+  fi
+
+  for os in "${OSLIST[@]}"; do
+    if [[ "$os" = "${OSNAME}" ]]; then
+      break
+    fi
+  done
+
+  if [[ "$os" = "${OSNAME}" ]]; then
+    break
+  fi
+
+  OSNAME=""
+done
+
+case $OSNAME in
+  Ubuntu1404)
+    OSBOX='osvm-trusty2'
+    ;;
+  Ubuntu1604)
+    OSBOX='osvm-xenial'
+    ;;
+  Debian8)
+    OSBOX='osvm-jessie'
+    VARNISHV=4
+    ;;
+esac
+
+# prepare tmp folder
+mkdir /tmp/${TMPFOLDER}
+pushd /tmp/${TMPFOLDER} >/dev/null
+mkdir manifests
+mkdir hiera
+mkdir modules
+rsync --exclude .git -av ${PUPPETFOLDER}/ modules/
+
+# prepare repo for test project
+mkdir -p repo
+pushd repo >/dev/null
+git init
+# Generate gitignore
+cat <<EOF > .gitignore
+# IDE settings
+.buildpath
+.externalToolBuilders/
+.project
+.settings/
+.idea
+
+# Excluding unwanted files
+.DS_Store
+*~
+
+node_modules
+npm-debug.log
+/tmp
+/*/sites/*/temp/
+/*/sites/*/settings.local.php
+/*/sites/*/settings.php
+/*/sites/*/files/
+/*/sites/sites.php
+
+# Ignore vendor folder (d8)
+/*/vendor/*
+!/*/vendor/.keep
+.apdisk
+
+/*/.idea/
+/*/node_modules/
+/*/dist/
+/*/*.iml
+/*/webpack-assets.json
+/*/webpack-stats.json
+/*/npm-debug.log
+/*/web/bundles/
+/*/web/uploads/
+/*/app/bootstrap.php.cache
+/*/app/cache/*
+/*/app/config/parameters.yml
+/*/app/logs/*
+/*/build/
+/*/vendor/
+/*/composer.phar
+/*/.apdisk
+EOF
+
+mkdir -p scripts
+touch scripts/postinstall.sh
+case "$FRAMEWORKS" in
+  drupal7)
+    mkdir -p server
+    pushd server >/dev/null
+    wget "https://ftp.drupal.org/files/projects/drupal-7.51.tar.gz"
+    tar xvfz drupal-7.51.tar.gz >/dev/null 2>&1
+    mv drupal-7.51/* .
+    mv drupal-7.51/.htaccess .
+    rm -rf drupal-7.51
+    popd >/dev/null
+    ;;
+  drupal8)
+    mkdir -p server
+    pushd server >/dev/null
+    wget "https://ftp.drupal.org/files/projects/drupal-8.2.1.tar.gz"
+    tar xvfz drupal-8.2.1.tar.gz >/dev/null 2>&1
+    mv drupal-8.2.1/* .
+    mv drupal-8.2.1/.htaccess .
+    rm -rf drupal-8.2.1
+    popd >/dev/null
+    ;;
+  symfony2)
+    mkdir -p server
+    pushd server >/dev/null
+    curl -s https://getcomposer.org/installer > setup.php && php setup.php
+    (( $? != 0 )) && echo "You need php insalled on your workstation for test symfony2 framework" && exit 1
+    rm -f setup.php
+    php composer.phar create-project symfony/framework-standard-edition sf2 "2.*" --no-progress --no-interaction
+    mkdir -p vendor; mv sf2/vendor/* vendor/; rm -rf sf2/vendor
+    mv sf2/* .; rm sf2/.gitignore; rm -rf sf2
+    php composer.phar install --no-progress --no-interaction
+    popd >/dev/null
+    ;;
+  symfony3)
+    mkdir -p server
+    pushd server >/dev/null
+    curl -s https://getcomposer.org/installer > setup.php && php setup.php
+    (( $? != 0 )) && echo "You need php insalled on your workstation for test symfony3 framework" && exit 1
+    rm -f setup.php
+    php composer.phar create-project symfony/framework-standard-edition sf3 "3.*" --no-progress --no-interaction
+    mkdir -p vendor; mv sf3/vendor/* vendor/; rm -rf sf3/vendor
+    mv sf3/* .; rm sf3/.gitignore; rm -rf sf3
+    php composer.phar install --no-progress --no-interaction
+    popd >/dev/null
+    ;;
+  wordpress)
+    mkdir -p server/wp-content/plugins
+    mkdir -p server/wp-content/themes
+    touch server/wp-content/plugins/.gitkeep
+    touch server/wp-content/themes/.gitkeep
+    ;;
+  nodejs)
+    mkdir -p nodejs
+    # Generate app.js
+    cat <<EOF > nodejs/app.js
+    var http = require('http');
+    var server = http.createServer(function (request, response) {
+      response.writeHead(200, {"Content-Type": "text/plain"});
+      response.end("Hello World\n");
+    });
+    server.listen(process.env.PORT || 3000);
+EOF
+    ;;
+  reactjs)
+    mkdir -p nodejs
+    pushd nodejs > /dev/null
+    wget https://github.com/erikras/react-redux-universal-hot-example/archive/master.zip
+    unzip master.zip
+    rm -f master.zip
+    mv react-redux-universal-hot-example-master/* .
+    find react-redux-universal-hot-example-master -type f -exec mv "{}" . \;
+    rmdir react-redux-universal-hot-example-master
+    popd > /dev/null
+    ;;
+  static)
+    mkdir -p server
+    touch server/index.html
+    ;;
+  noweb)
+    mkdir -p java
+    touch java/.gitkeep
+    ;;
+  drupal8-reactjs)
+    mkdir -p server
+    pushd server >/dev/null
+    wget "https://ftp.drupal.org/files/projects/drupal-8.2.1.tar.gz"
+    tar xvfz drupal-8.2.1.tar.gz >/dev/null 2>&1
+    mv drupal-8.2.1/* .
+    mv drupal-8.2.1/.htaccess .
+    rm -rf drupal-8.2.1
+    popd >/dev/null
+
+    mkdir -p nodejs
+    pushd nodejs > /dev/null
+    wget https://github.com/erikras/react-redux-universal-hot-example/archive/master.zip
+    unzip master.zip
+    rm -f master.zip
+    mv react-redux-universal-hot-example-master/* .
+    find react-redux-universal-hot-example-master -type f -exec mv "{}" . \;
+    rmdir react-redux-universal-hot-example-master
+    popd > /dev/null
+    ;;
+  drupal8-symfony3)
+    mkdir -p drupal
+    pushd drupal >/dev/null
+    wget "https://ftp.drupal.org/files/projects/drupal-8.2.1.tar.gz"
+    tar xvfz drupal-8.2.1.tar.gz >/dev/null 2>&1
+    mv drupal-8.2.1/* .
+    mv drupal-8.2.1/.htaccess .
+    rm -rf drupal-8.2.1
+    popd >/dev/null
+
+    mkdir -p symfony
+    pushd symfony >/dev/null
+    curl -s https://getcomposer.org/installer > setup.php && php setup.php
+    (( $? != 0 )) && echo "You need php insalled on your workstation for test symfony3 framework" && exit 1
+    rm -f setup.php
+    php composer.phar create-project symfony/framework-standard-edition sf3 "3.*" --no-progress --no-interaction
+    mkdir -p vendor; mv sf3/vendor/* vendor/; rm -rf sf3/vendor
+    mv sf3/* .; rm sf3/.gitignore; rm -rf sf3
+    php composer.phar install --no-progress --no-interaction
+    popd >/dev/null
+    ;;
+  symfony2-static)
+    mkdir -p html
+    touch html/index.html
+
+    mkdir -p server
+    pushd server >/dev/null
+    curl -s https://getcomposer.org/installer > setup.php && php setup.php
+    (( $? != 0 )) && echo "You need php insalled on your workstation for test symfony2 framework" && exit 1
+    rm -f setup.php
+    php composer.phar create-project symfony/framework-standard-edition sf2 "2.*" --no-progress --no-interaction
+    mkdir -p vendor; mv sf2/vendor/* vendor/; rm -rf sf2/vendor
+    mv sf2/* .; rm sf2/.gitignore; rm -rf sf2
+    php composer.phar install --no-progress --no-interaction
+    popd >/dev/null
+    ;;
+esac
+git add .
+git commit -m "Init project"
+popd >/dev/null
+
+# Generate Vagrantfile
+cat <<EOF > Vagrantfile
+Vagrant.configure("2") do |config|
+  config.ssh.username = "modem"
+  config.ssh.private_key_path = [ "${HOME}/.ssh/id_rsa", "${HOME}/.vagrant.d/insecure_private_key" ]
+  config.ssh.insert_key = false
+  config.vm.network "private_network", type: "dhcp"
+  config.vm.box_download_insecure = true
+  config.vm.synced_folder ".", "/vagrant", type: "rsync"
+
+  config.vm.define :nextdeploy, primary: true do |nextdeploy|
+    nextdeploy.vm.hostname = "$NAME"
+    nextdeploy.vm.box = "$OSBOX"
+    nextdeploy.vm.box_url = "http://imgs.nextdeploy.io/os/$OSBOX.box"
+    nextdeploy.vm.provider :virtualbox do |virthost|
+      virthost.memory = 1024
+      virthost.cpus = 2
+    end
+  end
+
+  config.vm.provision :puppet do |puppet|
+    puppet.synced_folder_type = "rsync"
+    puppet.manifest_file = "init.pp"
+    puppet.module_path = "modules"
+    puppet.options = "--ordering=manifest --hiera_config=/vagrant/hiera/nd.yaml"
+  end
+end
+EOF
+
+# Generate init.pp
+cat <<EOF > manifests/init.pp
+#include classes
+hiera_include("classes")
+EOF
+
+# Generate hiera file
+cat <<EOF > hiera/nd.yaml
+---
+:hierarchy:
+    - nd
+    - "%{clientcert}"
+    - global
+:backends:
+    - yaml
+:yaml:
+    :datadir: '/vagrant/hiera'
+
+classes:
+EOF
+
+for class in "${CLASSESBEFORE[@]}";do
+  echo "  - $class" >> hiera/nd.yaml
+done
+
+for class in "${FRMTECHNOS[@]}";do
+  echo "  - $class" >> hiera/nd.yaml
+done
+
+for class in "${TECHNOS[@]}";do
+  grep -e "  - $class$" hiera/nd.yaml >/dev/null 2>&1 || echo "  - $class" >> hiera/nd.yaml
+done
+
+for class in "${CLASSESAFTER[@]}";do
+  echo "  - $class" >> hiera/nd.yaml
+done
+
+cat <<EOF >> hiera/nd.yaml
+$URIS
+$BACKENDS
+ismysql: $ISMYSQL
+ismongo: $ISMONGO
+node_version: ${NODE_VERSION}
+iswebserver: ${ISWEB}
+isauth: ${ISAUTH}
+httpuser: '${HTUSER}'
+httppasswd: '${HTPASSWD}'
+isprod: ${ISPROD}
+webenv: '${WEBENV}'
+iscached: ${ISCACHED}
+isci: ${ISCI}
+isbackup: ${ISBACKUP}
+override: '${HTOVERRIDE}'
+pm::varnish::staticttl: 30m
+pm::varnish::isprod: ${ISPROD}
+pm::varnish::isauth: ${ISAUTH}
+pm::varnish::iscached: ${ISCACHED}
+pm::varnish::basicauth: ${HTAUTH}
+pm::varnish::version: ${VARNISHV}
+name: ${NAME}-${TSTAMP}
+etchosts: '${NAME}-${TSTAMP}.os.nextdeploy.local '
+toolsuri: pmtools.${NAME}-${TSTAMP}.os.nextdeploy.local
+commit: HEAD
+branch: master
+gitpath: /vagrant/repo
+email: nd@yopmail.com
+layout: fr
+docrootgit: /var/www/${PROJECT}
+project: ${PROJECT}
+nextdeployuri: nextdeploy.local
+system: '${OSNAME}'
+ftpuser: xxxxx
+ftppasswd: xxxx
+ossecip: 127.0.0.1
+influxip: 127.0.0.1
+EOF
+
+rm -rf modules/pm/files/sshkeys
+mkdir modules/pm/files/sshkeys
+touch modules/pm/files/sshkeys/nd@yopmail.com
+touch modules/pm/files/sshkeys/nd@yopmail.com.pub
+touch modules/pm/files/sshkeys/nd@yopmail.com.authorized_keys
+[[ -f ~/.ssh/id_rsa ]] && cp ~/.ssh/id_rsa modules/pm/files/sshkeys/nd@yopmail.com
+[[ -f ~/.ssh/id_rsa.pub ]] && cp ~/.ssh/id_rsa.pub modules/pm/files/sshkeys/nd@yopmail.com.pub
+[[ -f ~/.ssh/id_rsa.pub ]] && cp ~/.ssh/id_rsa.pub modules/pm/files/sshkeys/nd@yopmail.com.authorized_keys
+vagrant up
+
+# hm, ugly
+VMIP="$(echo "ip addr show dev eth1" | vagrant ssh | grep inet | sed "s;/24 brd.*;;" | sed "s;.*inet ;;" | tr -d "\n")"
+
+rm -rf modules/pm/files/sshkeys
+pushd ${PUPPETFOLDER} >/dev/null
+git checkout -- pm/files/sshkeys
+popd >/dev/null
+echo "##############################################################"
+echo "Vm IP: ${VMIP}"
+echo "For test purpose, add this line into your hosts file"
+echo "${VMIP} ${NAME}-${TSTAMP}.os.nextdeploy.local admin.${NAME}-${TSTAMP}.os.nextdeploy.local bo.${NAME}-${TSTAMP}.os.nextdeploy.local api.${NAME}-${TSTAMP}.os.nextdeploy.local pmtools.${NAME}-${TSTAMP}.os.nextdeploy.local"
+echo -e "\nAnd go in your browser with one of these uri, for example"
+echo "http://${NAME}-${TSTAMP}.os.nextdeploy.local/"
+echo "User: modem"
+echo "Password: modem"
+echo "##############################################################"
+vagrant ssh
+popd >/dev/null

@@ -58,6 +58,7 @@ define pm::build(
         pm::build::symfony { "${project}${path}":
           version => 3,
           path => "${path}",
+          absolute => "${absolute}",
           require => [ Exec["ci-composersh-${path}"], Exec["ci-npmsh-${path}"] ],
         }
       }

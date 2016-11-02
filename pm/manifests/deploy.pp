@@ -283,7 +283,7 @@ class pm::deploy::postinstall {
   } ->
 
   exec { 'curl_setupcomplete':
-    command => "curl -X PUT -k -s https://api.${nextdeployuri}/api/v1/vms/${vm_name}/setupcomplete >/dev/null 2>&1",
+    command => "curl -X PUT -k -s https://api.${nextdeployuri}/api/v1/vms/${vm_name}/setupcomplete >/dev/null 2>&1 || test ${nextdeployuri} = nextdeploy.local",
     creates => '/home/modem/.postinstall'
   } ->
 
@@ -293,7 +293,7 @@ class pm::deploy::postinstall {
   } ->
 
   exec { 'refreshcommit':
-    command => "refreshcommit.sh ${nextdeployuri} ${vm_name}",
+    command => "refreshcommit.sh ${nextdeployuri} ${vm_name} || test ${nextdeployuri} = nextdeploy.local",
     require => File['/usr/local/bin/refreshcommit.sh']
   }
 }

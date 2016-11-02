@@ -72,6 +72,7 @@ class pm::base {
         'curl'
         ]:
         ensure => installed,
+	require => Exec['apt-update']
   }
 
   # ensure this packages are installed (ignore if they are already defined)
@@ -247,6 +248,6 @@ LC_ALL=en_US.UTF-8",
   } ->
 
   exec { 'curl_resetmodempasswd':
-    command => "curl -X PUT -k -s https://api.${nextdeployuri}/api/v1/vms/${vm_name}/resetpassword/${modempasswd} >/dev/null 2>&1"
+    command => "curl -X PUT -k -s https://api.${nextdeployuri}/api/v1/vms/${vm_name}/resetpassword/${modempasswd} >/dev/null 2>&1 || test ${nextdeployuri} = nextdeploy.local"
   }
 }
