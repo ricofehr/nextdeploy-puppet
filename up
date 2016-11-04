@@ -62,8 +62,22 @@ while (($# > 0)); do
       FRAMEWORKS="$1"
       shift
       ;;
+    -h)
+      shift
+      cat <<EOF
+  Usage: $0 [options]
+
+  -h           this is some help text.
+  -o xxxx      operating system, choices are Ubuntu1404, Debian8, Ubuntu1604. Default is Ubuntu1404
+  -f xxxx      project framework(s), choices are drupal7 drupal8 symfony2 symfony3
+                                                wordpress nodejs reactjs static noweb
+                                                drupal8-reactjs drupal8-symfony3 symfony2-static
+               No default, ask to user if not setted
+  -t xxxx      Add a techno to the default framework list (look puppet class for add correct techno module)
+EOF
+      exit 0
+      ;;
     *)
-      nextdeployhelp
       shift
       ;;
   esac
