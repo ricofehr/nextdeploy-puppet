@@ -16,18 +16,25 @@ class pm::nosql::mongo {
 
   ensure_packages(['apt-transport-https'])
 
+  exec { 'aptmongokey':
+    command => 'apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv EA312927'
+  } ->
+
   #mongo setting
   class {'::mongodb::globals':
     manage_package_repo => true,
-    require => Package['apt-transport-https']
+    version => $version,
+    require => [Package['apt-transport-https'], Exec['aptmongokey']]
   } ->
 
   class {'::mongodb::server':
+    ensure => "present",
     pidfilepath => '/tmp/mongod.pid',
     require => Package['apt-transport-https']
   } ->
 
   class {'::mongodb::client':
+    ensure => "present",
     require => Package['apt-transport-https']
   } ->
 
@@ -54,7 +61,7 @@ class pm::nosql::mongo {
 
 # == Class: pm::nosql::memcache
 #
-# Install mongodb with help of official module
+# Install memcached with help of official module
 #
 #
 # === Authors
