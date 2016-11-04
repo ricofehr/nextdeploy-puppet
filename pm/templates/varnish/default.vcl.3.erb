@@ -357,12 +357,14 @@ sub vcl_miss {
 sub vcl_fetch {
  set beresp.grace = 30s;
 
+  <% if @iscors  -%>
   # rules for cross-domain requests
-  set beresp.http.Access-Control-Allow-Origin = req.http.origin ;
+  set beresp.http.Access-Control-Allow-Origin = "*" ;
   set beresp.http.Access-Control-Allow-Methods = "GET,PUT,POST,DELETE,PATCH,OPTIONS" ;
   set beresp.http.Access-Control-Max-Age = "1";
   set beresp.http.Access-Control-Allow-Credentials = "true";
   set beresp.http.Access-Control-Allow-Headers = "accept, authorization";
+  <% end -%>
 
   # set default ttl for static files
   if (beresp.http.Cache-Control ~ "public" && req.url ~ "(?i)\.(png|gif|jpeg|jpg|ico|swf|css|js|html|htm)(\?[a-z0-9]+)?$") {

@@ -385,12 +385,14 @@ sub vcl_miss {
 sub vcl_backend_response {
 # Called after the response headers has been successfully retrieved from the backend.
 
+  <% if @iscors -%>
   # rules for cross-domain requests
   set beresp.http.Access-Control-Allow-Origin = bereq.http.origin ;
   set beresp.http.Access-Control-Allow-Methods = "GET,PUT,POST,DELETE,PATCH,OPTIONS" ;
   set beresp.http.Access-Control-Max-Age = "1";
   set beresp.http.Access-Control-Allow-Credentials = "true";
   set beresp.http.Access-Control-Allow-Headers = "accept, authorization";
+  <% end -%>
 
   # Pause ESI request and remove Surrogate-Control header
   if (beresp.http.Surrogate-Control ~ "ESI/1.0") {

@@ -14,6 +14,7 @@ class pm::varnish(
   $isauth = true,
   $iscached = false,
   $isprod = false,
+  $iscors = true,
   $basicauth = 'b2tvazpva29r') {
   Exec { path => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/", "/usr/local/bin", "/opt/bin" ] }
 
@@ -41,6 +42,7 @@ class pm::varnish(
   # - $isauth
   # - $iscached
   # - $isprod
+  # - $iscors
   # - $basicauth
   file { '/etc/varnish/default.vcl':
     ensure => file,

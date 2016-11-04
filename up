@@ -7,10 +7,11 @@ NODE_VERSION='4.x'
 ISMYSQL=0
 ISMONGO=0
 ISWEB=1
-ISAUTH=1
+ISAUTH="true"
 ISPROD=0
-ISCACHED=0
+ISCACHED="false"
 ISCI=1
+ISCORS="true"
 ISBACKUP=0
 VARNISHV=3
 NAME="$((TSTAMP%100))-www-test-com"
@@ -696,6 +697,7 @@ pm::varnish::isprod: ${ISPROD}
 pm::varnish::isauth: ${ISAUTH}
 pm::varnish::iscached: ${ISCACHED}
 pm::varnish::basicauth: ${HTAUTH}
+pm::varnish::iscors: ${ISCORS}
 pm::varnish::version: ${VARNISHV}
 name: ${NAME}-${TSTAMP}
 etchosts: '${NAME}-${TSTAMP}.os.nextdeploy.local '

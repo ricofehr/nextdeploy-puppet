@@ -18,7 +18,7 @@ class pm::base::apt {
   exec { "apt-update":
     command => "apt-get update",
     timeout => 1800,
-    onlyif => 'test "$(($(date +%l)%3))" = "0"',
+    onlyif => 'test ! -f /tmp/puppethour || test "$(($(date +%l)%3))" = "0"',
     unless => 'test -f /tmp/puppethour && test "$(date +%l)" = "$(cat /tmp/puppethour)"'
   } ->
 
