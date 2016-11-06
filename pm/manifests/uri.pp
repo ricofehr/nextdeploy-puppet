@@ -81,7 +81,7 @@ define pm::uri(
   }
 
   case $framework {
-    'drupal6', 'drupal7', 'drupal8', 'symfony2', 'symfony3', 'wordpress-4.5.2', 'static': {
+    'drupal6', 'drupal7', 'drupal8', 'symfony2', 'symfony3', 'wordpress-4.5.2', 'wordpress-4.5.3', 'static': {
       if $isprod == 1 {
         apache::vhost { "${name}":
             vhost_name => "${name}",
@@ -231,6 +231,16 @@ define pm::uri(
           path => "${path}",
           absolute => "${absolute}",
           version => '4.5.2',
+          require => [ Exec["composersh-${path}"], Exec["npmsh-${path}"], Mysql::Db["${path}"] ],
+          before => [ Exec["importsh-${path}"] ]
+        }
+      }
+
+      'wordpress-4.5.3': {
+        pm::uri::wordpress { "${project}${path}":
+          path => "${path}",
+          absolute => "${absolute}",
+          version => '4.5.3',
           require => [ Exec["composersh-${path}"], Exec["npmsh-${path}"], Mysql::Db["${path}"] ],
           before => [ Exec["importsh-${path}"] ]
         }
@@ -500,7 +510,7 @@ define pm::uri::symfony(
 define pm::uri::wordpress(
   $absolute,
   $path = "server",
-  $version = '4.5.2'
+  $version = '4.5.3'
 ) {
   $docrootgit = hiera('docrootgit', '/var/www/html')
   $docroot = "${docrootgit}/${path}"
