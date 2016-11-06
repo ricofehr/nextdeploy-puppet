@@ -255,7 +255,7 @@ class pm::deploy::postinstall {
 
   file_line { 'localuris':
     path => '/etc/hosts',
-    line => "127.0.1.1 ${line_host}",
+    line => "127.0.0.1 ${line_host}",
   } ->
 
   exec { 'restartvarnish_postinstall':
