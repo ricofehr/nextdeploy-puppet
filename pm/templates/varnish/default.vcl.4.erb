@@ -101,6 +101,13 @@ sub vcl_recv {
     return(pipe);
   }
 
+  # Do not allow outside access to cron.php or install.php. Depending on your access to the server, you might want to comment-out this block of code for development.
+  if (req.url ~ "^/(cron|install|app_dev)\.php")
+  {
+      # Throw error directly:
+      return (synth(404, "Page not found."));
+  }
+
   <% if ! @iscached  -%>
   return (pass);
   <% end -%>
@@ -200,13 +207,6 @@ sub vcl_recv {
   #{
   #    return (pass);
   #}
-
-  # Do not allow outside access to cron.php or install.php. Depending on your access to the server, you might want to comment-out this block of code for development.
-  if (req.url ~ "^/(cron|install|app_dev)\.php")
-  {
-      # Throw error directly:
-      return (synth(404, "Page not found."));
-  }
 
   if (req.http.Cache-Control ~ "(?i)no-cache") {
   #if (req.http.Cache-Control ~ "(?i)no-cache" && client.ip ~ editors) { # create the acl editors if you want to restrict the Ctrl-F5

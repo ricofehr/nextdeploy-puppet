@@ -114,17 +114,6 @@ sub vcl_recv {
     return(pipe);
   }
 
-  <% if ! @iscached  -%>
-  return (pass);
-  <% end -%>
-
-  # Tout ce qui n'est pas GET ou HEAD ne sera pas mis en cache
-  # On utilise la directive PASS et non PIPE
-  if (req.request != "GET" &&
-      req.request != "HEAD") {
-        return (pass);
-  }
-
   # On normalise les header de compression GZIP
   # A cause de IE et FF qui ne sont pas normalises
   if (req.http.Accept-Encoding) {
@@ -152,22 +141,25 @@ sub vcl_recv {
     return (pipe);
   }
 
-  # Force look-up if request is a no-cache request.
-  #if (req.http.Cache-Control ~ "no-cache") {
-  #    return (pass);
-  #}
-
   # Do not allow outside access to cron.php or install.php. Depending on your access to the server, you might want to comment-out this block of code for development.
   if (req.url ~ "^/(cron|install|app_dev)\.php")
   {
       # Throw error directly:
       error 404 "Page not found.";
-      # Or;
-      # Use a custom error page on path /error-404.
-      # set req.url = "/error-404";
   }
 
-    # Some generic URL manipulation, useful for all templates that follow
+  <% if ! @iscached  -%>
+  return (pass);
+  <% end -%>
+
+  # Tout ce qui n'est pas GET ou HEAD ne sera pas mis en cache
+  # On utilise la directive PASS et non PIPE
+  if (req.request != "GET" &&
+      req.request != "HEAD") {
+        return (pass);
+  }
+
+  # Some generic URL manipulation, useful for all templates that follow
   # First remove the Google Analytics added parameters, useless for our backend
   if (req.url ~ "(\?|&)(utm_source|utm_medium|utm_campaign|utm_content|gclid|cx|ie|cof|siteurl)=") {
     set req.url = regsuball(req.url, "&(utm_source|utm_medium|utm_campaign|utm_content|gclid|cx|ie|cof|siteurl)=([A-z0-9_\-\.%25]+)", "");
