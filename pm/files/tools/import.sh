@@ -193,7 +193,7 @@ importsql() {
 
   sqlfiles="$(ls *.sql.gz)"
   for sqlf in ${sqlfiles[@]}; do
-    dbname="${sqlf#*_}"
+    dbname="${sqlf##*_}"
     dbname="${dbname%%.sql.gz}"
     if [[ "$dbname" = "s_bdd" ]] || [[ "$dbname" = "dump" ]]; then
       zcat "$sqlf" | mysql -u s_bdd -ps_bdd s_bdd
