@@ -73,3 +73,6 @@
 [submodule "kibana4"]
 	path = kibana4
 	url = https://github.com/lesaux/puppet-kibana4
+[submodule "multitemplate"]
+	path = multitemplate
+	url = https://github.com/deanwilson/puppet-multitemplate

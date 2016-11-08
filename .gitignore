@@ -19,3 +19,8 @@ nohup.out
 
 #rubymine folder
 .idea
+
+#ignore varnish projects override folder
+/pm/templates/varnish/projects/*
+!/pm/templates/varnish/projects/.gitkeep
+

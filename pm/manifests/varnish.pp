@@ -18,6 +18,8 @@ class pm::varnish(
   $basicauth = 'b2tvazpva29r') {
   Exec { path => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/", "/usr/local/bin", "/opt/bin" ] }
 
+  $project = hiera('project', 'www.test.com')
+
   package { 'varnish':
     ensure => present,
   } ->
@@ -47,7 +49,8 @@ class pm::varnish(
   file { '/etc/varnish/default.vcl':
     ensure => file,
     mode   => 644,
-    content => template("pm/varnish/default.vcl.${version}.erb"),
+    content => multitemplate("pm/varnish/projects/${project}/default.vcl.${version}.erb",
+                             "pm/varnish/default.vcl.${version}.erb"),
     owner => 'root',
     notify => Service['varnish']
   } ->
