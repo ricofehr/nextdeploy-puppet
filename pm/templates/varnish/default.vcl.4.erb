@@ -387,7 +387,7 @@ sub vcl_backend_response {
 
   <% if @iscors -%>
   # rules for cross-domain requests
-  set beresp.http.Access-Control-Allow-Origin = bereq.http.origin ;
+  set beresp.http.Access-Control-Allow-Origin = "*" ;
   set beresp.http.Access-Control-Allow-Methods = "GET,PUT,POST,DELETE,PATCH,OPTIONS" ;
   set beresp.http.Access-Control-Max-Age = "1";
   set beresp.http.Access-Control-Allow-Credentials = "true";
