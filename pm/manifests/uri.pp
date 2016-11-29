@@ -337,11 +337,11 @@ define pm::uri::drupal(
   } ->
 
   exec { "site-install-${path}":
-    command => "/usr/local/bin/drush -y site-install --db-url=mysql://s_bdd:s_bdd@localhost:3306/${path} --locale=en --account-name=${username} --account-pass=${adminpass} --site-name=${project} --account-mail=${email} --site-mail=${email} standard >/dev/null 2>&1",
-    environment => ["HOME=/home/modem", "USER=modem", "LC_ALL=en_US.UTF-8", "LANG=en_US.UTF-8", "LANGUAGE=en_US.UTF-8", "SHELL=/bin/bash", "TERM=xterm"],
+    command => "siteinstall.sh --docroot ${docroot} --eppath ${path} --username ${username} --adminpass ${adminpass} --project ${project} --email ${email}",
+    environment => ["HOME=/home/modem"],
     creates => "/home/modem/.deploy${path}",
-    cwd => "${docroot}",
-    require => Package['php5-gd'],
+    cwd => '/home/modem',
+    require => [Exec['touchdeploygit'], Package['php5-gd']],
     timeout => 3600
   }
 

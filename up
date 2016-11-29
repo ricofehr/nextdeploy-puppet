@@ -485,7 +485,7 @@ case "$FRAMEWORKS" in
     tar xvfz drupal-8.2.1.tar.gz >/dev/null 2>&1
     mv drupal-8.2.1/* .
     mv drupal-8.2.1/.htaccess .
-    rm -rf drupal-8.2.1
+    rm -rf drupal-8.2.1 drupal-8.2.1.tar.gz
     popd >/dev/null
     ;;
   symfony2)
