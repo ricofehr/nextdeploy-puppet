@@ -57,3 +57,21 @@ class pm::tool::wkhtmltopdf ($major = '0.12', $minor = '3') {
 class pm::tool::phpapc {
   ensure_packages(['php-apc'])
 }
+
+# == Class: pm::tool::imagemagick
+#
+# Install imagemagick
+#
+#
+# === Authors
+#
+# Eric Fehr <ricofehr@nextdeploy.io>
+#
+class pm::tool::imagemagick {
+  $isweb = hiera('iswebserver', 0)
+
+  ensure_packages(['imagemagick'])
+  if $isweb == 1 {
+    ensure_packages(['php5-imagick'])
+  }
+}
