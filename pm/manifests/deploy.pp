@@ -215,6 +215,12 @@ class pm::deploy::postinstall {
     require => Exec['touchdeploygit']
   } ->
 
+  file { "${docroot}/scripts":
+    ensure => directory,
+    owner => 'modem',
+    group => 'www-data'
+  } ->
+
   exec { 'touch_postinstallsh':
     command => 'touch scripts/postinstall.sh',
     creates => '/home/modem/.postinstall'
