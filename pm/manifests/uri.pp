@@ -404,6 +404,11 @@ define pm::uri::symfony(
     3: { $consolebin = "bin/console" }
   }
 
+  case "$version" {
+    2: { $varfolder = "app" }
+    3: { $varfolder = "var" }
+  }
+
   Exec {
     path => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/", "/usr/local/bin", "/opt/bin" ],
     user => 'modem',
@@ -413,7 +418,7 @@ define pm::uri::symfony(
   }
 
   # Ensure the logs/cache directory exists with the right permissions
-  file { "${docroot}/app/logs":
+  file { "${docroot}/${varfolder}/logs":
     ensure            =>  directory,
     owner             =>  modem,
     group             =>  www-data,
@@ -421,7 +426,7 @@ define pm::uri::symfony(
   } ->
 
   # Ensure the logs/cache directory exists with the right permissions
-  file { "${docroot}/app/cache":
+  file { "${docroot}/${varfolder}/cache":
     ensure            =>  directory,
     owner             =>  modem,
     group             =>  www-data,
