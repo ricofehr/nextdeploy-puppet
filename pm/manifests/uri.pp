@@ -25,7 +25,8 @@ define pm::uri(
   file { "${docroot}":
     ensure => directory,
     owner => 'modem',
-    group => 'www-data'
+    group => 'www-data',
+    replace => false
   } ->
 
   exec { "gemsh-${path}":
