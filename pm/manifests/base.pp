@@ -27,6 +27,42 @@ class pm::base::apt {
   }
 }
 
+# == Class: pm::base::fw
+#
+# Install firewall script for current node
+#
+#
+# === Authors
+#
+# Eric Fehr <ricofehr@nextdeploy.io>
+#
+class pm::base::fw {
+  $project = hiera('project', '')
+
+  file { '/etc/init.d/firewall':
+    owner => 'root',
+    mode => '700',
+    source => [
+          "puppet:///modules/pm/fw/projects/fw_${project}",
+          "puppet:///modules/pm/fw/fw",
+          ],
+    group => 'root',
+    notify => Exec['fw_notify']
+  }
+
+  exec { 'fw_notify':
+    command => '/etc/init.d/firewall restart',
+    path => '/usr/bin:/usr/sbin:/bin:/sbin',
+    refreshonly => true
+  }
+
+  exec { 'fw_restart':
+    command => '/etc/init.d/firewall restart',
+    path => '/usr/bin:/usr/sbin:/bin:/sbin',
+    unless => '/sbin/iptables-save | grep "dport 8140"',
+    require => File['/etc/init.d/firewall']
+  }
+}
 
 # == Class: pm::base
 #
@@ -112,6 +148,8 @@ LC_ALL=en_US.UTF-8",
 
   #ntp class
   include ntp
+
+  class { 'pm::base::fw': }
 
   # samba share
   class {'samba::server':

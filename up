@@ -731,9 +731,6 @@ vagrant up
 VMIP="$(echo "ip addr show dev eth1" | vagrant ssh | grep inet | sed "s;/24 brd.*;;" | sed "s;.*inet ;;" | tr -d "\n")"
 
 rm -rf modules/pm/files/sshkeys
-pushd ${PUPPETFOLDER} >/dev/null
-git checkout -- pm/files/sshkeys
-popd >/dev/null
 echo "##############################################################"
 echo "Vm IP: ${VMIP}"
 echo "For test purpose, add this line into your hosts file"
