@@ -85,6 +85,8 @@ do_start()
         # Ossec
         $IPTABLES -A OUTPUT -p udp --dport 1514 -j ACCEPT
         $IPTABLES -A OUTPUT -p tcp --dport 1514 -j ACCEPT
+        $IPTABLES -A OUTPUT -p udp --dport 1515 -j ACCEPT
+        $IPTABLES -A OUTPUT -p tcp --dport 1515 -j ACCEPT
 
         # Ftp
         $IPTABLES -A OUTPUT -p tcp --dport 20:21 -j ACCEPT
