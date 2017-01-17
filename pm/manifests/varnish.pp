@@ -88,4 +88,23 @@ class pm::varnish(
   }
   ->
   class { 'pm::monitor::collect::varnish': }
+
+  # stop varnishlog if already started
+  exec { 'stopvarnishlog':
+    command => 'service varnishlog stop',
+    onlyif => 'test -f /lib/systemd/system/varnishlog.service',
+  } ->
+
+  file { '/etc/default/varnishlog':
+    ensure => file,
+    mode   => 644,
+    source => [
+      "puppet:///modules/pm/varnish/varnishlog_default",
+    ]
+  }
+  ->
+
+  file { '/lib/systemd/system/varnishlog.service':
+    ensure => absent
+  }
 }
