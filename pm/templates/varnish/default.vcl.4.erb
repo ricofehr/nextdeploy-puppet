@@ -51,6 +51,12 @@ sub vcl_recv {
   <% if @backends and @backends.size > 0 -%>
     <%- @backends.each do |backend| -%>
     if (req.http.host == "<%= backend["absolute"] %>"<% if backend["aliases"] and ! backend["aliases"].empty? -%><%- backend["aliases"].each do |serveralias| -%> || req.http.host == "<%= serveralias %>"<%- end -%><% end -%> ) {
+      <% if backend["is_redir_alias"] -%>
+        if (req.http.host != "<%= backend["absolute"] %>") {
+          return (synth(720, "http://" + "<%= backend["absolute"] %>"));
+        }
+      <%- end -%>
+
       set req.backend_hint = <%= backend["path"] %>;
 
       # return pass if OPTIONS
@@ -500,14 +506,14 @@ sub vcl_synth {
   if (resp.status == 720) {
     # We use this special error status 720 to force redirects with 301 (permanent) redirects
     # To use this, call the following from anywhere in vcl_recv: return (synth(720, "http://host/new.html"));
-    set resp.status = 301;
     set resp.http.Location = resp.reason;
+    set resp.status = 301;
     return (deliver);
   } elseif (resp.status == 721) {
     # And we use error status 721 to force redirects with a 302 (temporary) redirect
     # To use this, call the following from anywhere in vcl_recv: return (synth(720, "http://host/new.html"));
-    set resp.status = 302;
     set resp.http.Location = resp.reason;
+    set resp.status = 302;
     return (deliver);
   }
 

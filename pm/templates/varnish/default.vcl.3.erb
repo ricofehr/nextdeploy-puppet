@@ -66,6 +66,12 @@ sub vcl_recv {
   <% if @backends and @backends.size > 0 -%>
     <%- @backends.each do |backend| -%>
     if (req.http.host == "<%= backend["absolute"] %>"<% if backend["aliases"] and ! backend["aliases"].empty? -%><%- backend["aliases"].each do |serveralias| -%> || req.http.host == "<%= serveralias %>"<%- end -%><% end -%> ) {
+      <% if backend["is_redir_alias"] -%>
+        if (req.http.host != "<%= backend["absolute"] %>") {
+          set req.http.host = "<%= backend["absolute"] %>";
+          error 301;
+        }
+      <%- end -%>
       set req.backend = <%= backend["path"] %>;
 
       # return pass if OPTIONS
@@ -425,6 +431,11 @@ sub vcl_deliver {
 }
 
 sub vcl_error {
+
+if (obj.status == 301) {
+  set obj.http.Location = "http://" + req.http.host + req.url;
+  return (deliver);
+}
 
 if (obj.status == 401) {
   set obj.http.Content-Type = "text/html; charset=utf-8";
