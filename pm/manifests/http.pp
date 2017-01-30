@@ -97,7 +97,8 @@ Disallow: /'
     post_max_size => '150M',
     upload_max_filesize => '150M',
     error_reporting => "E_ALL & ~E_DEPRECATED & ~E_NOTICE",
-    default_socket_timeout => '600'
+    default_socket_timeout => '600',
+    always_populate_raw_post_data  => '-1'
   }
 
   class { 'php::cli':}
