@@ -22,11 +22,23 @@ define pm::uri(
   $override = hiera('override', 'None')
   $project = hiera('project', '')
 
+  # keep file on docroot because override apache one
   file { "${docroot}":
     ensure => directory,
     owner => 'modem',
     group => 'www-data',
     replace => false
+  } ->
+
+  exec { "docrootsh-${path}":
+    command => "docroot.sh ${docrootgit} ${path} >/home/modem/logdocroot${path} 2>&1",
+    environment => ["HOME=/home/modem"],
+    user => 'modem',
+    group => 'www-data',
+    cwd => '/home/modem',
+    creates => "/home/modem/.deploy${path}",
+    timeout => 1800,
+    require => Exec['touchdeploygit']
   } ->
 
   exec { "gemsh-${path}":
