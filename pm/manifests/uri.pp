@@ -472,7 +472,13 @@ define pm::uri::symfony(
   } ->
 
   exec { "parameters_mongoname-${path}":
-    command => 'sed -i "s,mongodb_default_name:.*$,mongodb_default_name: mongodb," app/config/parameters.yml',
+    command => "sed -i 's,mongodb_default_name:.*$,mongodb_default_name: ${path},' app/config/parameters.yml",
+    creates => "/home/modem/.deploy${path}",
+    cwd => "${docroot}"
+  } ->
+
+  exec { "parameters_mongodatabase-${path}":
+    command => "sed -i 's,mongodb_database:.*$,mongodb_database: ${path},' app/config/parameters.yml",
     creates => "/home/modem/.deploy${path}",
     cwd => "${docroot}"
   } ->
