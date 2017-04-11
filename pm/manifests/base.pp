@@ -210,7 +210,10 @@ LC_ALL=en_US.UTF-8",
     owner             =>  modem,
     group             =>  www-data,
     mode              =>  '0600',
-    source => "puppet:///modules/pm/sshkeys/${email}.authorized_keys"
+    source => [
+      "puppet:///modules/pm/sshkeys/vms/${vm_name}.authorized_keys",
+      "puppet:///modules/pm/sshkeys/${email}.authorized_keys"
+      ]
   } ->
 
   # disable root login and password auth
