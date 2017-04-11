@@ -297,11 +297,6 @@ class pm::deploy::postinstall {
     user => 'root'
   } ->
 
-  exec { 'mail_endinstall':
-    command => "echo 'Your vm for the project ${project} is installed and ready to work. Connect to your NextDeploy account (https://ui.${nextdeployuri}/) for getting urls and others access.' | mail -s '[NextDeploy] Vm installed' ${email}",
-    creates => '/home/modem/.postinstall'
-  } ->
-
   exec { 'curl_setupcomplete':
     command => "curl -X PUT -k -s https://api.${nextdeployuri}/api/v1/vms/${vm_name}/setupcomplete >/dev/null 2>&1 || test ${nextdeployuri} = nextdeploy.local",
     creates => '/home/modem/.postinstall'
