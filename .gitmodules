@@ -73,3 +73,6 @@
 [submodule "multitemplate"]
 	path = multitemplate
 	url = https://github.com/deanwilson/puppet-multitemplate
+[submodule "php"]
+	path = php
+	url = https://github.com/ricofehr/puppet-php

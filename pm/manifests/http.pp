@@ -10,6 +10,16 @@
 class pm::http {
   Exec { path => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/", "/usr/local/bin", "/opt/bin" ] }
 
+  #php7 for xenial
+  if ($::operatingsystem == 'Ubuntu' and versioncmp($::operatingsystemrelease, '16.04') < 0) or ($::operatingsystem == 'Debian' and versioncmp($::operatingsystemrelease, '9') < 0) {
+    $php_folder = '/etc/php5'
+    $phpdev_pkg = 'php5-dev'
+  }
+  else {
+    $php_folder = '/etc/php/7.0'
+    $phpdev_pkg = 'php7.0-dev'
+  }
+
   # apache setting
   class { '::apache':
     default_mods        => false,
@@ -87,7 +97,7 @@ Disallow: /'
 
   class {'::apache::mod::php':}
 
-  php::ini { '/etc/php5/apache2/php.ini':
+  php::ini { "${php_folder}/apache2/php.ini":
     display_errors => 'Off',
     memory_limit   => '1024M',
     max_execution_time => '0',
@@ -103,11 +113,11 @@ Disallow: /'
 
   class { 'php::cli':}
   ->
-  package { [ 'php-pear', 'php5-dev']:
+  package { [ 'php-pear', $phpdev_pkg]:
     ensure => installed,
   }
 
-  php::ini { '/etc/php5/cli/php.ini':
+  php::ini { "${php_folder}/cli/php.ini":
     memory_limit   => '-1',
     date_timezone => 'Europe/Paris',
     max_execution_time => '0',
@@ -121,18 +131,18 @@ Disallow: /'
       command => "/usr/bin/yes '' | /usr/bin/pecl install --force mongo-1.5.8",
       user => "root",
       environment => ["HOME=/root"],
-      unless => '/usr/bin/test -f /etc/php5/apache2/conf.d/20-mongo.ini',
-      require => [ Package['php-pear'], Package['php5-dev'] ]
+      unless => "/usr/bin/test -f ${php_folder}/apache2/conf.d/20-mongo.ini",
+      require => [ Package['php-pear'], Package[$phpdev_pkg] ]
     }
     ->
 
-    file { "/etc/php5/apache2/conf.d/20-mongo.ini":
+    file { "${php_folder}/conf.d/20-mongo.ini":
       content => "extension=mongo.so",
       owner => "root"
     }
     ->
 
-    file { "/etc/php5/cli/conf.d/20-mongo.ini":
+    file { "${php_folder}/cli/conf.d/20-mongo.ini":
       content => "extension=mongo.so",
       owner => "root"
     }
