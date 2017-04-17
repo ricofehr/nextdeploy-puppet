@@ -25,9 +25,6 @@
 [submodule "ntp"]
 	path = ntp
 	url = https://github.com/puppetlabs/puppetlabs-ntp.git
-[submodule "php"]
-	path = php
-	url = https://github.com/thias/puppet-php.git
 [submodule "rabbitmq"]
 	path = rabbitmq
 	url = https://github.com/puppetlabs/puppetlabs-rabbitmq.git
