@@ -94,7 +94,7 @@ define pm::uri(
   }
 
   case $framework {
-    'drupal6', 'drupal7', 'drupal8', 'symfony2', 'symfony3', 'wordpress-4.5.2', 'wordpress-4.5.3', 'static': {
+    'drupal6', 'drupal7', 'drupal8', 'symfony2', 'symfony3', 'wordpress-4.5.2', 'wordpress-4.5.3', 'static', 'basenurun': {
       if $isprod == 1 {
         apache::vhost { "${name}":
             vhost_name => "${name}",
