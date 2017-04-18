@@ -15,9 +15,11 @@ class pm::nodejs {
     repo_url_suffix => "${node_version}"
   }
   ->
-  file { '/usr/bin/node':
-    ensure   => 'link',
-    target => '/usr/bin/nodejs',
+  # ensure node binary exists
+  exec { 'node-symlink':
+    command => '/bin/ln -sf /usr/bin/nodejs /usr/bin/node',
+    user => 'root',
+    creates => '/usr/bin/node'
   }
   ->
   package { ['pm2', 'grunt-cli', 'bower', 'gulp']:
