@@ -118,14 +118,6 @@ class pm::base {
     ensure => 'purged'
   }
 
-  # Fix issue about wrong elf on libicudata
-  # Juste temporary fix ...
-  exec { 'fixlibicu':
-    command => 'apt-get install --reinstall --yes --force-yes libicu52',
-    environment => ['DEBIAN_FRONTEND=noninteractive'],
-    creates => '/home/modem/.postinstall'
-  }
-
   #env locals settings
   file { '/etc/environment':
     ensure => file,
