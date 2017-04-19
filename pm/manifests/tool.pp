@@ -72,6 +72,12 @@ class pm::tool::imagemagick {
 
   ensure_packages(['imagemagick'])
   if $isweb == 1 {
-    ensure_packages(['php5-imagick'])
+    #php7 for xenial
+    if ($::operatingsystem == 'Ubuntu' and versioncmp($::operatingsystemrelease, '16.04') < 0) or ($::operatingsystem == 'Debian' and versioncmp($::operatingsystemrelease, '9') < 0) {
+        ensure_packages(['php5-imagick'])
+    }
+    else {
+        ensure_packages(['php7.0-imagick'])
+    }
   }
 }

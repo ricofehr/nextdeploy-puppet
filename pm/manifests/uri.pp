@@ -354,7 +354,7 @@ define pm::uri::drupal(
     environment => ["HOME=/home/modem"],
     creates => "/home/modem/.deploy${path}",
     cwd => '/home/modem',
-    require => [Exec['touchdeploygit'], Package['php5-gd']],
+    require => Exec['touchdeploygit'],
     timeout => 3600
   }
 
