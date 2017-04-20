@@ -148,7 +148,14 @@ Disallow: /'
     }
   }
 
-  php::module { [ 'mysql', 'redis', 'memcached', 'gd', 'curl', 'intl', 'mcrypt', 'ldap' ]: }
+  # mbstring on php7
+  if ($::operatingsystem == 'Ubuntu' and versioncmp($::operatingsystemrelease, '16.04') < 0) or ($::operatingsystem == 'Debian' and versioncmp($::operatingsystemrelease, '9') < 0) {
+    php::module { [ 'mysql', 'redis', 'memcached', 'gd', 'curl', 'intl', 'mcrypt', 'ldap' ]: }
+  }
+  else {
+    php::module { [ 'mysql', 'redis', 'memcached', 'gd', 'curl', 'intl', 'mcrypt', 'ldap', 'mbstring' ]: }
+  }
+
 
   file { '/var/www/pm_tools':
     ensure => directory,
