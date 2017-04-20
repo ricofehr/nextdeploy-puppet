@@ -136,7 +136,7 @@ Disallow: /'
     }
     ->
 
-    file { "${php_folder}/conf.d/20-mongo.ini":
+    file { "${php_folder}/apache2/conf.d/20-mongo.ini":
       content => "extension=mongo.so",
       owner => "root"
     }
