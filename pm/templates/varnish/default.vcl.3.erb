@@ -78,7 +78,7 @@ sub vcl_recv {
       if (req.request == "OPTIONS") { return(pass); }
 
       # bypass fb and googleplus
-      if (req.http.User-Agent ~ "^facebook" || req.http.User-Agent ~ "Firefox/6.0 Google \(\+https://developers") {
+      if (req.http.User-Agent ~ "PhantomJS" || req.http.User-Agent ~ "^facebook" || req.http.User-Agent ~ "Firefox/6.0 Google \(\+https://developers") {
        return(pipe) ;
       }
       <% if backend["ipfilter"] and backend["ipfilter"] != '' -%>
