@@ -8,7 +8,7 @@
 # Eric Fehr <ricofehr@nextdeploy.io>
 #
 class pm::nodejs {
-  $node_version = hiera('node_version', '4.x')
+  $node_version = hiera('node_version', '6.x')
 
   # nodejs and ember_build prerequisites
   class { '::nodejs':
