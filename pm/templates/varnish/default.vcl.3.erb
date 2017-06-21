@@ -11,6 +11,24 @@ backend default {
   .between_bytes_timeout = 300s;
 }
 
+backend jenkins {
+  .host = "127.0.0.1";
+  .port = "9294";
+  .max_connections = 250;
+  .connect_timeout = 300s;
+  .first_byte_timeout = 300s;
+  .between_bytes_timeout = 300s;
+}
+
+backend sonar {
+  .host = "127.0.0.1";
+  .port = "9000";
+  .max_connections = 250;
+  .connect_timeout = 300s;
+  .first_byte_timeout = 300s;
+  .between_bytes_timeout = 300s;
+}
+
 <% if @backends and @backends.size > 0 -%>
   <%- @backends.each do |backend| -%>
   <% if backend["path"] != "default" -%>
@@ -89,6 +107,23 @@ sub vcl_recv {
     <%- end -%>
   <% end -%>
 
+  # Jenkins backend
+  if (req.http.host ~ "jenkins") {
+    if (! req.http.Authorization ~ "Basic <%= @basicauth %>") { error 401 ;}
+    unset req.http.Authorization;
+
+    set req.backend = jenkins;
+    return (pipe);
+  }
+
+  # Sonar backend
+  if (req.http.host ~ "sonar") {
+    if (! req.http.Authorization ~ "Basic <%= @basicauth %>") { error 401 ;}
+    unset req.http.Authorization;
+
+    set req.backend = sonar;
+    return (pipe);
+  }
 
   # Auth part
   if (req.http.host ~ "^pmtools\.") {

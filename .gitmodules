@@ -85,3 +85,6 @@
 [submodule "sonarqube"]
 	path = sonarqube
 	url = https://github.com/ricofehr/puppet-sonarqube
+[submodule "jenkins"]
+	path = jenkins
+	url = https://github.com/ricofehr/puppet-jenkins

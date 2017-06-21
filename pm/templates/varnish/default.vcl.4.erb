@@ -13,6 +13,15 @@ backend default {
   .between_bytes_timeout  = 300s;
 }
 
+backend jenkins {
+  .host = "127.0.0.1";
+  .port = "9294";
+  .max_connections = 300;
+  .first_byte_timeout     = 300s;
+  .connect_timeout        = 300s;
+  .between_bytes_timeout  = 300s;
+}
+
 <% if @backends and @backends.size > 0 -%>
   <%- @backends.each do |backend| -%>
   <% if backend["path"] != "default" -%>
@@ -76,6 +85,15 @@ sub vcl_recv {
 
   # Normalize the header, remove the port (in case you're testing this on various TCP ports)
   set req.http.Host = regsub(req.http.Host, ":[0-9]+", "");
+
+  # Jenkins backend
+  if (req.http.host ~ "jenkins") {
+    if (! req.http.Authorization ~ "Basic <%= @basicauth %>") { return (synth(401, "Error 401")) ;}
+    unset req.http.Authorization;
+
+    set req.backend_hint = jenkins;
+    return (pipe);
+  }
 
   # Auth part
   if (req.http.Host ~ "^pmtools\.") {

@@ -27,3 +27,9 @@ nohup.out
 # Ignore iptable projects files
 /pm/files/fw/projects/*
 !/pm/files/fw/projects/.gitkeep
+
+# Ignore generated files
+Vagrantfile
+nd@yopmail.com
+nd@yopmail.com.authorized_keys
+nd@yopmail.com.pub

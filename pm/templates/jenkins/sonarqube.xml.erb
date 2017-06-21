@@ -1,0 +1,63 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties></properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers>
+    <jenkins.triggers.ReverseBuildTrigger>
+      <spec></spec>
+      <upstreamProjects>build</upstreamProjects>
+      <threshold>
+        <name>SUCCESS</name>
+        <ordinal>0</ordinal>
+        <color>BLUE</color>
+        <completeBuild>true</completeBuild>
+      </threshold>
+    </jenkins.triggers.ReverseBuildTrigger>
+  </triggers>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>#!/bin/bash
+        set -e
+
+        pushd <%= @docroot %> >/dev/null
+        # generate default sonar properties if needed
+        if [[ ! -f sonar-project.properties ]]; then
+          echo "sonar.projectKey=<%= @path %>-$(date +%s)" > sonar-project.properties
+          echo 'sonar.projectName=<%= @path %>-<%= @project %>' >> sonar-project.properties
+          echo 'sonar.projectVersion=1.0' >> sonar-project.properties
+          echo 'sonar.exclusions=**/node_modules/**' >> sonar-project.properties
+          if [[ -d src ]]; then
+            echo 'sonar.sources=src' >> sonar-project.properties
+          else
+            echo 'sonar.sources=.' >> sonar-project.properties
+          fi
+
+          if [[ "<%= @framework %>" = 'static' ]] ||
+             [[ "<%= @framework %>" = 'basenurun' ]] ||
+             [[ "<%= @framework %>" = 'nodejs' ]] ||
+             [[ "<%= @framework %>" = 'reactjs' ]]; then
+             echo 'sonar.language=js' >> sonar-project.properties
+          else
+            echo 'sonar.language=php' >> sonar-project.properties
+          fi
+        fi
+        /opt/sonar/bin/./sonar-scanner
+        popd >/dev/null
+</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers/>
+  <buildWrappers>
+    <hudson.plugins.ansicolor.AnsiColorBuildWrapper plugin="ansicolor@0.5.0">
+      <colorMapName>xterm</colorMapName>
+    </hudson.plugins.ansicolor.AnsiColorBuildWrapper>
+  </buildWrappers>
+</project>

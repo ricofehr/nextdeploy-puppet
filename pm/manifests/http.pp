@@ -113,7 +113,7 @@ Disallow: /'
 
   class { 'php::cli':}
   ->
-  package { [ 'php-pear', $phpdev_pkg]:
+  package { [ 'php-pear', $phpdev_pkg, 'phpunit']:
     ensure => installed,
   }
 

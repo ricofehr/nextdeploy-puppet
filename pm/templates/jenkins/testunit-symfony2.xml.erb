@@ -1,0 +1,54 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties></properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers>
+    <jenkins.triggers.ReverseBuildTrigger>
+      <spec></spec>
+      <upstreamProjects>build</upstreamProjects>
+      <threshold>
+        <name>SUCCESS</name>
+        <ordinal>0</ordinal>
+        <color>BLUE</color>
+        <completeBuild>true</completeBuild>
+      </threshold>
+    </jenkins.triggers.ReverseBuildTrigger>
+  </triggers>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>#!/bin/bash
+set +e
+pushd <%= @docroot %> >/dev/null
+php app/console | grep "fixtures:load" >/dev/null 2>&amp;1
+# fixtures cmd, we insert them
+if (($? == 0)); then
+  php app/console doctrine:schema:drop --force --env=test
+  php app/console doctrine:schema:create --env=test
+  php app/console doctrine:fixtures:load --env=test
+fi
+
+# check phpunit is in composer
+grep "phpunit/phpunit" composer.json >/dev/null 2>&amp;1
+if (($? == 0)); then
+  set -e
+  phpunit -c app/
+fi
+popd >/dev/null
+</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers/>
+    <buildWrappers>
+      <hudson.plugins.ansicolor.AnsiColorBuildWrapper plugin="ansicolor@0.5.0">
+        <colorMapName>xterm</colorMapName>
+      </hudson.plugins.ansicolor.AnsiColorBuildWrapper>
+    </buildWrappers>
+</project>

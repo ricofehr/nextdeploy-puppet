@@ -3,7 +3,7 @@
 PUPPETFOLDER="${PWD}"
 TSTAMP="$(date +%s)"
 TMPFOLDER="nd${TSTAMP}"
-NODE_VERSION='4.x'
+NODE_VERSION='6.x'
 ISMYSQL=0
 ISMONGO=0
 ISWEB=1
@@ -13,6 +13,7 @@ ISCACHED="false"
 ISCI=1
 ISCORS="true"
 ISBACKUP=0
+ISJENKINS=0
 VARNISHV=3
 NAME="$((TSTAMP%100))-www-test-com"
 HTUSER='modem'
@@ -27,7 +28,7 @@ OSBOX='osvm-trusty2'
 OSLIST=('Ubuntu1404' 'Debian8' 'Ubuntu1604')
 FRAMEWORKSLIST=('drupal7' 'drupal8' 'symfony2' 'symfony3' 'wordpress' 'nodejs'
                 'reactjs' 'static' 'noweb' 'drupal8-reactjs' 'drupal8-symfony3'
-                'symfony2-static')
+                'symfony2-static' 'basenurun' 'symfony2-basenurun')
 CLASSESBEFORE=('pm::base::apt' 'pm::base' 'pm::mail' 'pm::monitor::collect'
                'pm::hids::agent' 'pm::deploy::vhost')
 TECHNOS=()
@@ -43,6 +44,11 @@ while (($# > 0)); do
       OSNAME="$1"
       shift
       ;;
+    -j)
+      shift
+      ISJENKINS=1
+      TECHNOS+=('pm::ci::cijenkins' 'pm::ci::cisonar' 'pm::ci::cidoc' 'pm::ci::ciw3af')
+      ;;
     -t|--techno)
       shift
       # check if this techno is already in the list
@@ -53,7 +59,7 @@ while (($# > 0)); do
       done
       if [[ "$techno" != "$1" ]]; then
          if  [[ "$techno" = "${TECHNOS[${#TECHNOS[@]}-1]}" ]]; then
-           TECHNOS+="$1"
+           TECHNOS+=("$1")
          fi
       fi
       shift
@@ -69,10 +75,11 @@ while (($# > 0)); do
   Usage: $0 [options]
 
   -h           this is some help text.
+  -j           add a jenkins app on an endpoint
   -o xxxx      operating system, choices are Ubuntu1404, Debian8, Ubuntu1604. Default is Ubuntu1404
   -f xxxx      project framework(s), choices are drupal7 drupal8 symfony2 symfony3
-                                                wordpress nodejs reactjs static noweb
-                                                drupal8-reactjs drupal8-symfony3 symfony2-static
+                                                wordpress nodejs reactjs static noweb basenurun
+                                                drupal8-reactjs drupal8-symfony3 symfony2-static symfony2-basenurun
                No default, ask to user if not setted
   -t xxxx      Add a techno to the default framework list (look puppet class for add correct techno module)
 EOF
@@ -255,6 +262,21 @@ case $FRAMEWORKS in
     port: 8080
     ipfilter: ''"
     ;;
+  basenurun)
+    FRMTECHNOS=('pm::nodejs' 'pm::http' 'pm::varnish')
+    URIS="uris:
+  ${NAME}-${TSTAMP}.os.nextdeploy.local:
+    path: server
+    framework: basenurun
+    publicfolder: ''
+    rewrites: ''
+    customvhost: ''"
+    BACKENDS="pm::varnish::backends:
+  - absolute: ${NAME}-${TSTAMP}.os.nextdeploy.local
+    path: server
+    port: 8080
+    ipfilter: ''"
+    ;;
   noweb)
     ISWEB=0
     FRMTECHNOS=('pm::java' 'pm::sql' 'pm::nosql::mongo')
@@ -348,6 +370,35 @@ case $FRAMEWORKS in
   html.${NAME}-${TSTAMP}.os.nextdeploy.local:
     path: html
     framework: static
+    publicfolder: ''
+    rewrites: ''
+    customvhost: ''"
+    BACKENDS="pm::varnish::backends:
+  - absolute: ${NAME}-${TSTAMP}.os.nextdeploy.local
+    path: server
+    port: 8080
+    aliases:
+      - admin.${NAME}-${TSTAMP}.os.nextdeploy.local
+    ipfilter: ''
+  - absolute: html.${NAME}-${TSTAMP}.os.nextdeploy.local
+    path: html
+    port: 8080
+    ipfilter: ''"
+    ;;
+  symfony2-basenurun)
+    FRMTECHNOS=('pm::nodejs' 'pm::http' 'pm::varnish' 'pm::sql')
+    URIS="uris:
+  ${NAME}-${TSTAMP}.os.nextdeploy.local:
+    path: server
+    aliases:
+      - admin.${NAME}-${TSTAMP}.os.nextdeploy.local
+    framework: symfony2
+    publicfolder: 'web/'
+    rewrites: \"RewriteEngine On\nRewriteRule ^/?$ /app_dev.php [L]\nRewriteCond %%{literal('%')}{REQUEST_URI} !=/server-status\nRewriteCond %%{literal('%')}{REQUEST_FILENAME} !-f\nRewriteCond %%{literal('%')}{REQUEST_FILENAME} !-d\nRewriteRule .* /app_dev.php [L]\n\"
+    customvhost: ''
+  html.${NAME}-${TSTAMP}.os.nextdeploy.local:
+    path: html
+    framework: basenurun
     publicfolder: ''
     rewrites: ''
     customvhost: ''"
@@ -605,6 +656,37 @@ EOF
     php composer.phar install --no-progress --no-interaction
     popd >/dev/null
     ;;
+  basenurun)
+    git clone https://github.com/romuleald/base-nurun
+    mv base-nurun/html server
+    rm -rf base-nurun
+    pushd server > /dev/null
+    curl -sS https://getcomposer.org/installer | php
+    /usr/bin/php composer.phar install -n --prefer-dist
+    /bin/rm -f composer.phar
+    popd > /dev/null
+    ;;
+  symfony2-basenurun)
+    git clone https://github.com/romuleald/base-nurun
+    mv base-nurun/html html
+    rm -rf base-nurun
+    pushd html > /dev/null
+    curl -sS https://getcomposer.org/installer | php
+    /usr/bin/php composer.phar install -n --prefer-dist
+    /bin/rm -f composer.phar
+    popd > /dev/null
+
+    mkdir -p server
+    pushd server >/dev/null
+    curl -s https://getcomposer.org/installer > setup.php && php setup.php
+    (( $? != 0 )) && echo "You need php insalled on your workstation for test symfony2 framework" && exit 1
+    rm -f setup.php
+    php composer.phar create-project symfony/framework-standard-edition sf2 "2.*" --no-progress --no-interaction
+    mkdir -p vendor; mv sf2/vendor/* vendor/; rm -rf sf2/vendor
+    mv sf2/* .; rm sf2/.gitignore; rm -rf sf2
+    php composer.phar install --no-progress --no-interaction
+    popd >/dev/null
+    ;;
 esac
 git add .
 git commit -m "Init project"
@@ -626,7 +708,7 @@ Vagrant.configure("2") do |config|
     nextdeploy.vm.box_url = "http://imgs.nextdeploy.io/os/$OSBOX.box"
     nextdeploy.vm.provider :virtualbox do |virthost|
       virthost.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
-      virthost.memory = 1024
+      virthost.memory = 3072
       virthost.cpus = 2
     end
   end
@@ -703,6 +785,7 @@ pm::varnish::version: ${VARNISHV}
 name: ${NAME}-${TSTAMP}
 etchosts: '${NAME}-${TSTAMP}.os.nextdeploy.local '
 toolsuri: pmtools.${NAME}-${TSTAMP}.os.nextdeploy.local
+docuri: pmdoc.${NAME}-${TSTAMP}.os.nextdeploy.local
 commit: HEAD
 branch: master
 gitpath: /vagrant/repo
@@ -720,13 +803,23 @@ EOF
 
 rm -rf modules/pm/files/sshkeys
 mkdir modules/pm/files/sshkeys
-touch modules/pm/files/sshkeys/nd@yopmail.com
-touch modules/pm/files/sshkeys/nd@yopmail.com.pub
-touch modules/pm/files/sshkeys/nd@yopmail.com.authorized_keys
-[[ -f ~/.ssh/id_rsa ]] && cp ~/.ssh/id_rsa modules/pm/files/sshkeys/nd@yopmail.com
-[[ -f ~/.ssh/id_rsa.pub ]] && cp ~/.ssh/id_rsa.pub modules/pm/files/sshkeys/nd@yopmail.com.pub
-[[ -f ~/.ssh/id_rsa.pub ]] && cp ~/.ssh/id_rsa.pub modules/pm/files/sshkeys/nd@yopmail.com.authorized_keys
+pushd modules/pm/files/sshkeys >/dev/null
+ssh-keygen -t rsa -f nd@yopmail.com -q -P ''
+cp nd@yopmail.com.pub nd@yopmail.com.authorized_keys
+if [[ -f ~/.ssh/id_rsa ]]; then
+  cat ~/.ssh/id_rsa.pub >> nd@yopmail.com.authorized_keys
+else
+  cp nd@yopmail.com ~/.ssh/id_rsa
+  cp nd@yopmail.com.pub ~/.ssh/id_rsa.pub
+fi
+popd >/dev/null
 vagrant up
+
+# jenkins endpoint
+JENKINSURI=""
+if ((ISJENKINS == 1)); then
+  JENKINSURI="jenkins.${NAME}-${TSTAMP}.os.nextdeploy.local sonar.${NAME}-${TSTAMP}.os.nextdeploy.local pmdoc.${NAME}-${TSTAMP}.os.nextdeploy.local"
+fi
 
 # hm, ugly
 VMIP="$(echo "ip addr show dev eth1" | vagrant ssh | grep inet | sed "s;/24 brd.*;;" | sed "s;.*inet ;;" | tr -d "\n")"
@@ -735,7 +828,7 @@ rm -rf modules/pm/files/sshkeys
 echo "##############################################################"
 echo "Vm IP: ${VMIP}"
 echo "For test purpose, add this line into your hosts file"
-echo "${VMIP} ${NAME}-${TSTAMP}.os.nextdeploy.local admin.${NAME}-${TSTAMP}.os.nextdeploy.local bo.${NAME}-${TSTAMP}.os.nextdeploy.local api.${NAME}-${TSTAMP}.os.nextdeploy.local pmtools.${NAME}-${TSTAMP}.os.nextdeploy.local"
+echo "${VMIP} ${NAME}-${TSTAMP}.os.nextdeploy.local admin.${NAME}-${TSTAMP}.os.nextdeploy.local bo.${NAME}-${TSTAMP}.os.nextdeploy.local api.${NAME}-${TSTAMP}.os.nextdeploy.local pmtools.${NAME}-${TSTAMP}.os.nextdeploy.local ${JENKINSURI}"
 echo -e "\nAnd go in your browser with one of these uri, for example"
 echo "http://${NAME}-${TSTAMP}.os.nextdeploy.local/"
 echo "User: modem"

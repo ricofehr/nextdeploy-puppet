@@ -104,15 +104,14 @@ class pm::base {
         'git-core',
         'ethtool',
         'mailutils',
-        'ncftp',
-        'curl'
+        'ncftp'
         ]:
         ensure => installed,
 	require => Exec['apt-update']
   }
 
   # ensure this packages are installed (ignore if they are already defined)
-  ensure_packages(['unzip', 'wget', 'ruby-dev', 'nmap'])
+  ensure_packages(['unzip', 'wget', 'ruby-dev', 'nmap', 'curl'])
 
   package { 'wkhtmltopdf':
     ensure => 'purged'
