@@ -47,8 +47,15 @@ class pm::deploy::vhost {
     require => [ Package['git-core'], File['/home/modem/.ssh/id_rsa'] ]
   } ->
 
+  file { '/usr/local/bin/deploycommit.sh':
+    source => 'puppet:///modules/pm/tools/deploycommit.sh',
+    owner => 'modem',
+    group => 'www-data',
+    mode => '0755'
+  } ->
+
   exec { 'gitreset':
-    command => "git reset --hard ${commit}",
+    command => "deploycommit.sh ${docroot} ${commit}",
     user => 'modem',
     cwd => "${docroot}",
     creates => '/home/modem/.deploygit',
