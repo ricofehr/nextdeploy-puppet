@@ -76,9 +76,6 @@
 [submodule "php"]
 	path = php
 	url = https://github.com/ricofehr/puppet-php
-[submodule "jenkins"]
-	path = jenkins
-	url = https://github.com/jenkinsci/puppet-jenkins
 [submodule "jdk_oracle"]
 	path = jdk_oracle
 	url = https://github.com/tylerwalts/puppet-jdk_oracle
