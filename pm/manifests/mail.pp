@@ -13,6 +13,7 @@ class pm::mail {
     creates => '/root/.installpostfix'
   }
 
+  $vm_name = hiera('name', 'undefined')
   $nextdeployuri = hiera('nextdeployuri', 'nextdeploy.local')
 
   package { 'postfix':
@@ -22,7 +23,8 @@ class pm::mail {
   file { '/etc/postfix/canonical':
     ensure => file,
     mode   => 644,
-    content => "www-data www-data@${nextdeployuri}
+    content => "@${vm_name} @${nextdeployuri}
+www-data www-data@${nextdeployuri}
 modem modem@${nextdeployuri}
 root root@${nextdeployuri}",
     owner => 'root'
@@ -39,7 +41,7 @@ root root@${nextdeployuri}",
   } ->
 
   exec { 'restartpostfix':
-    command => 'postmap canonical',
+    command => 'service postfix restart',
     cwd => '/etc/postfix'
   } ->
 
