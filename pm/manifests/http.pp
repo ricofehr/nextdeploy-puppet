@@ -148,6 +148,18 @@ Disallow: /'
     }
   }
 
+  # nesting level for xdebug
+  file { "${php_folder}/apache2/conf.d/20-xdebugsetting.ini":
+    content => "xdebug.max_nesting_level=2048",
+    owner => "root"
+  }
+  ->
+
+  file { "${php_folder}/cli/conf.d/20-xdebugsetting.ini":
+    content => "xdebug.max_nesting_level=2048",
+    owner => "root"
+  }
+
   # mbstring on php7
   if ($::operatingsystem == 'Ubuntu' and versioncmp($::operatingsystemrelease, '16.04') < 0) or ($::operatingsystem == 'Debian' and versioncmp($::operatingsystemrelease, '9') < 0) {
     php::module { [ 'mysql', 'redis', 'memcached', 'gd', 'curl', 'intl', 'mcrypt', 'ldap' ]: }
