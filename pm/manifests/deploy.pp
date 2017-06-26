@@ -315,7 +315,7 @@ class pm::deploy::postinstall {
   } ->
 
   exec { 'refreshcommit':
-    command => "refreshcommit.sh ${nextdeployuri} ${vm_name} || test ${nextdeployuri} = nextdeploy.local",
+    command => "test ${nextdeployuri} = nextdeploy.local || refreshcommit.sh ${nextdeployuri} ${vm_name}",
     require => File['/usr/local/bin/refreshcommit.sh']
   }
 }
