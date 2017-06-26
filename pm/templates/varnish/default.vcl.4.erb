@@ -55,6 +55,10 @@ sub vcl_recv {
     }
   }
 
+  <% if @isoffline -%>
+  return (synth(721, "https://maintenance..<%= @offlineuri %>"));
+  <%- end -%>
+
   // backend and ipfilter
   set req.backend_hint = default;
   <% if @backends and @backends.size > 0 -%>

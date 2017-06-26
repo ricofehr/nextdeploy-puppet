@@ -79,6 +79,12 @@ sub vcl_recv {
         error 405 "Not allowed";
   }
 
+  <% if @isoffline -%>
+  set req.http.host = "maintenance.<%= @offlineuri %>";
+  set req.url = "/";
+  error 302;
+  <%- end -%>
+
   // backend and ipfilter
   set req.backend = default;
   <% if @backends and @backends.size > 0 -%>
@@ -469,6 +475,11 @@ sub vcl_error {
 
 if (obj.status == 301) {
   set obj.http.Location = "http://" + req.http.host + req.url;
+  return (deliver);
+}
+
+if (obj.status == 302 && req.http.host ~ "maintenance") {
+  set obj.http.Location = "https://" + req.http.host + req.url;
   return (deliver);
 }
 

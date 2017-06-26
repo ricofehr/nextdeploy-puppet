@@ -15,10 +15,12 @@ class pm::varnish(
   $iscached = false,
   $isprod = false,
   $iscors = true,
+  $isoffline = false,
   $basicauth = 'b2tvazpva29r') {
   Exec { path => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/", "/usr/local/bin", "/opt/bin" ] }
 
   $project = hiera('project', 'www.test.com')
+  $offlineuri = hiera('offlineuri', 'maintenance.nextdeploy.local')
 
   package { 'varnish':
     ensure => present,
@@ -46,6 +48,8 @@ class pm::varnish(
   # - $isprod
   # - $iscors
   # - $basicauth
+  # - $isoffline
+  # - $offlineuri
   file { '/etc/varnish/default.vcl':
     ensure => file,
     mode   => 644,
