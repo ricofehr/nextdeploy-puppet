@@ -80,7 +80,7 @@ sub vcl_recv {
   }
 
   <% if @isoffline -%>
-  set req.http.host = "maintenance.<%= @offlineuri %>";
+  set req.http.host = "<%= @offlineuri %>";
   set req.url = "/";
   error 302;
   <%- end -%>
@@ -95,6 +95,18 @@ sub vcl_recv {
           set req.http.host = "<%= backend["absolute"] %>";
           error 301;
         }
+      <%- end -%>
+
+      <% if backend["is_ssl"] -%>
+      # Redirect http to https
+      if (!req.http.X-Forwarded-Proto || req.http.X-Forwarded-Proto != "https") {
+        error 303;
+      }
+      <%- else -%>
+      # Redirect http to https
+      if (req.http.X-Forwarded-Proto && req.http.X-Forwarded-Proto == "https") {
+        error 301;
+      }
       <%- end -%>
       set req.backend = <%= backend["path"] %>;
 
@@ -472,6 +484,12 @@ sub vcl_deliver {
 }
 
 sub vcl_error {
+
+if (obj.status == 303) {
+  set obj.status = 301;
+  set obj.http.Location = "https://" + req.http.host + req.url;
+  return (deliver);
+}
 
 if (obj.status == 301) {
   set obj.http.Location = "http://" + req.http.host + req.url;

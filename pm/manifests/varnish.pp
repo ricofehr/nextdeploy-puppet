@@ -20,7 +20,8 @@ class pm::varnish(
   Exec { path => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/", "/usr/local/bin", "/opt/bin" ] }
 
   $project = hiera('project', 'www.test.com')
-  $offlineuri = hiera('offlineuri', 'maintenance.nextdeploy.local')
+  $nextdeployuri = hiera('nextdeployuri', 'nextdeploy.local')
+  $offlineuri = "maintenance.${nextdeployuri}"
 
   package { 'varnish':
     ensure => present,

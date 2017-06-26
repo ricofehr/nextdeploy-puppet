@@ -56,7 +56,7 @@ sub vcl_recv {
   }
 
   <% if @isoffline -%>
-  return (synth(721, "https://maintenance..<%= @offlineuri %>"));
+  return (synth(721, "https://<%= @offlineuri %>"));
   <%- end -%>
 
   // backend and ipfilter
@@ -68,6 +68,18 @@ sub vcl_recv {
         if (req.http.host != "<%= backend["absolute"] %>") {
           return (synth(720, "http://" + "<%= backend["absolute"] %>"));
         }
+      <%- end -%>
+
+      <% if backend["is_ssl"] -%>
+      # Redirect http to https
+      if (!req.http.X-Forwarded-Proto || req.http.X-Forwarded-Proto != "https") {
+        return (synth(720, "https://" + req.http.host + "/" + req.url));
+      }
+      <%- else -%>
+      # Redirect http to https
+      if (req.http.X-Forwarded-Proto && req.http.X-Forwarded-Proto == "https") {
+        return (synth(720, "http://" + req.http.host + "/" + req.url));
+      }
       <%- end -%>
 
       set req.backend_hint = <%= backend["path"] %>;
