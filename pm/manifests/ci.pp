@@ -30,7 +30,7 @@ class pm::ci::cijenkins {
 
   class {'jenkins':
     port => "9294",
-    lts => true,
+    version => '2.46.3',
     install_java => false,
     config_hash => {
        'HTTP_PORT' => { 'value' => '9294' },
