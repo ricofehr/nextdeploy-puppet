@@ -451,6 +451,7 @@ case $OSNAME in
     ;;
   Ubuntu1604)
     OSBOX='osvm-xenial'
+    VARNISHV=4
     ;;
   Debian8)
     OSBOX='osvm-jessie'

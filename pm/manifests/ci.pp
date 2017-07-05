@@ -79,12 +79,25 @@ class pm::ci::cijenkins {
   jenkins::plugin { 'bouncycastle-api': }
   jenkins::plugin { 'ansicolor': }
 
-  ensure_packages(['chromium-browser', 'xvfb'])
+  ensure_packages(['xvfb'])
+  if $::operatingsystem == 'Ubuntu' {
+    ensure_packages(['chromium-browser'])
 
-  file { '/usr/bin/chrome':
-     ensure => 'link',
-     target => '/usr/bin/chromium-browser',
-     require => Package['chromium-browser']
+    file { '/usr/bin/chrome':
+      ensure => 'link',
+      target => '/usr/bin/chromium-browser',
+      require => Package['chromium-browser']
+    }
+  }
+
+  if $::operatingsystem == 'Debian' {
+    ensure_packages(['chromium'])
+
+    file { '/usr/bin/chrome':
+      ensure => 'link',
+      target => '/usr/bin/chromium-browser',
+      require => Package['chromium']
+    }
   }
 
   file { '/usr/bin/xvfb':
@@ -232,7 +245,7 @@ class pm::ci::cidoc {
   ensure_packages(['php-dompdf'])
 
   exec {'pear-phpdoc-channel':
-    command => 'pear channel-discover pear.phpdoc.org',
+    command => 'pear channel-discover pear.phpdoc.org || test 1',
     creates => '/usr/bin/phpdoc',
     require => Package['php-pear']
   } ->
@@ -287,7 +300,7 @@ class pm::ci::ciw3af {
   $docrootgit = hiera('docrootgit', '/var/www/html')
   $docroot = "${docrootgit}/${path}"
 
-  ensure_packages(['python-pip', 'python-lxml', 'python-scapy', 'python-dev', 'python-setuptools'])
+  ensure_packages(['python-pip', 'python-lxml', 'python-scapy', 'python-dev', 'python-setuptools', 'libxml2-dev', 'libxslt-dev'])
 
   exec {'pybloomfiltermmap-package':
     command => 'easy_install pybloomfiltermmap==0.3.14',
