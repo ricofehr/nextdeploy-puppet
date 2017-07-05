@@ -112,7 +112,7 @@ sub vcl_recv {
   }
 
   # Auth part
-  if (req.http.Host ~ "^pmtools\.") {
+  if (req.http.Host ~ "^pmtools") {
     if (! req.http.Authorization ~ "Basic <%= @basicauth %>") { return (synth(401, "Error 401")) ;}
     unset req.http.Authorization;
     return (pipe);
