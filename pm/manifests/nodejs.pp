@@ -22,7 +22,7 @@ class pm::nodejs {
     creates => '/usr/bin/node'
   }
   ->
-  package { ['pm2', 'grunt-cli', 'bower', 'gulp']:
+  package { ['pm2', 'grunt-cli', 'bower', 'gulp', 'yuidocjs']:
     ensure   => present,
     provider => 'npm',
     before => File['/usr/local/bin/npm.sh']

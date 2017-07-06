@@ -25,7 +25,7 @@
   <builders>
     <hudson.tasks.Shell>
       <command>#!/bin/bash
-/usr/bin/phpdoc run -d <%= @docroot %>/sites/all/ -t /var/www/pm_doc/<%= @path %>
+        /usr/bin/phpdoc run -d <%= @docroot %>/sites/all/ -t /var/www/pm_doc/<%= @path %>
 </command>
     </hudson.tasks.Shell>
   </builders>

@@ -26,9 +26,9 @@
     <hudson.tasks.Shell>
       <command>#!/bin/bash
       if [[ -d <%= @docroot %>/src ]]; then
-        /usr/bin/phpdoc run -d <%= @docroot %>/src/ -t /var/www/pm_doc/<%= @path %>
+        yuidoc -x vendor,node_modules,.git,tmp,.DS_Store -e .js,.php -o /var/www/pm_doc/<%= @path %> <%= @docroot %>/src/
       else
-        /usr/bin/phpdoc run -d <%= @docroot %>/ -t /var/www/pm_doc/<%= @path %>
+        yuidoc -x vendor,node_modules,.git,tmp,.DS_Store -e .js,.php -o /var/www/pm_doc/<%= @path %> <%= @docroot %>/
       fi
 </command>
     </hudson.tasks.Shell>

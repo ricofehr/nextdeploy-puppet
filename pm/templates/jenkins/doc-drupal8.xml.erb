@@ -25,9 +25,7 @@
   <builders>
     <hudson.tasks.Shell>
       <command>#!/bin/bash
-CUSTOM_MODULES=""
-[[ -d <%= @docroot %>/modules/custom ]] &amp;&amp; CUSTOM_MODULES="-d <%= @docroot %>/modules/custom"
-/usr/bin/phpdoc run -d <%= @docroot %>/profiles/ $CUSTOM_MODULES -t /var/www/pm_doc/<%= @path %>
+/usr/bin/phpdoc run -d <%= @docroot %>/profiles/,<%= @docroot %>/modules/ -t /var/www/pm_doc/<%= @path %>
 </command>
     </hudson.tasks.Shell>
   </builders>
