@@ -358,7 +358,7 @@ define pm::uri::drupal(
     creates => "/home/modem/.deploy${path}",
     cwd => '/home/modem',
     require => Exec['touchdeploygit'],
-    timeout => 3600
+    timeout => 10800
   }
 
   if $iscache == 1 {
