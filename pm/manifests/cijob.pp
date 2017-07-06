@@ -4,6 +4,7 @@ define pm::cijob(
   $envvars = [],
   $aliases = [],
   $framework,
+  $clustering = 1,
   $rewrites = '',
   $publicfolder = '',
   $customvhost = ''
