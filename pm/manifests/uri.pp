@@ -4,6 +4,7 @@ define pm::uri(
   $envvars = [],
   $aliases = [],
   $framework,
+  $clustering = 1,
   $rewrites = '',
   $publicfolder = '',
   $customvhost = ''
@@ -225,6 +226,7 @@ define pm::uri(
         pm::uri::nodejs { "${project}${path}":
           path => "${path}",
           envvars => $envvars,
+          clustering => $clustering,
           require => [ Exec["npmsh-${path}"] ],
           before => [ Exec["importsh-${path}"] ]
         }
@@ -234,6 +236,7 @@ define pm::uri(
         pm::uri::reactjs { "${project}${path}":
           path => "${path}",
           envvars => $envvars,
+          clustering => $clustering,
           require => [ Exec["npmsh-${path}"] ],
           before => [ Exec["importsh-${path}"] ]
         }
@@ -601,7 +604,8 @@ define pm::uri::wordpress(
 
 define pm::uri::nodejs(
   $path = "nodejs",
-  $envvars = ["HOME=/home/modem", "PORT=3100"]
+  $envvars = ["HOME=/home/modem", "PORT=3100"],
+  $clustering = 1
 ) {
 
   $docrootgit = hiera('docrootgit', '/var/www/html')
@@ -615,7 +619,7 @@ define pm::uri::nodejs(
   }
 
   exec { "pm2start-${path}":
-    command => "pm2 start -f app.js --name '${path}-app' -i 0",
+    command => "pm2 start -f app.js --name '${path}-app' -i ${clustering}",
     onlyif => 'test -f app.js',
     environment => $envvars,
     cwd => "${docroot}",
@@ -624,7 +628,7 @@ define pm::uri::nodejs(
   } ->
 
   exec { "pm2start_server-${path}":
-    command => "pm2 start -f server.js --name '${path}-server' -i 0",
+    command => "pm2 start -f server.js --name '${path}-server' -i ${clustering}",
     onlyif => 'test -f server.js',
     environment => $envvars,
     cwd => "${docroot}",
@@ -634,7 +638,8 @@ define pm::uri::nodejs(
 
 define pm::uri::reactjs(
   $path = "nodejs",
-  $envvars = ["HOME=/home/modem", "PORT=3100"]
+  $envvars = ["HOME=/home/modem", "PORT=3100"],
+  $clustering = 1
 ) {
 
   $docrootgit = hiera('docrootgit', '/var/www/html')
@@ -648,7 +653,7 @@ define pm::uri::reactjs(
   }
 
   exec { "pm2start_server_bin-${path}":
-    command => "pm2 start -f bin/server.js --name '${path}-server' -i 0",
+    command => "pm2 start -f bin/server.js --name '${path}-server' -i ${clustering}",
     onlyif => 'test -f bin/server.js',
     environment => $envvars,
     cwd => "${docroot}",
@@ -658,7 +663,7 @@ define pm::uri::reactjs(
 
   # reactjs start
   exec { "pm2start_api_bin-${path}":
-    command => "pm2 start -f bin/api.js --name '${path}-api' -i 0",
+    command => "pm2 start -f bin/api.js --name '${path}-api' -i ${clustering}",
     environment => $envvars,
     cwd => "${docroot}",
     onlyif => 'test -f bin/api.js',
