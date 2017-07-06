@@ -300,11 +300,12 @@ class pm::ci::ciw3af {
   $docrootgit = hiera('docrootgit', '/var/www/html')
   $docroot = "${docrootgit}/${path}"
 
-  ensure_packages(['python-pip', 'python-lxml', 'python-scapy', 'python-dev', 'python-setuptools', 'libxml2-dev', 'libxslt-dev'])
+  ensure_packages(['python-pip', 'python-lxml', 'python-scapy', 'python-dev', 'python-crypto', 'python-setuptools', 'libxml2-dev', 'libxslt-dev', 'libssl-dev'])
 
   exec {'pybloomfiltermmap-package':
     command => 'easy_install pybloomfiltermmap==0.3.14',
-    creates => '/home/modem/.w3af_install'
+    creates => '/home/modem/.w3af_install',
+    require => [Package['python-crypto'], Package['python-pip'], Package['python-dev'], Package['python-setuptools'], Package['libssl-dev']]
   } ->
 
   exec {'pip-update':
@@ -321,7 +322,8 @@ class pm::ci::ciw3af {
   exec {'w3af-prerequisite':
     command => '/opt/w3af/./w3af_console || /tmp/./w3af_dependency_install.sh',
     cwd => '/opt',
-    creates => '/home/modem/.w3af_install'
+    creates => '/home/modem/.w3af_install',
+    require => [Package['libxml2-dev'], Package['libxslt-dev']]
   } ->
 
   exec {'w3af-chown':
