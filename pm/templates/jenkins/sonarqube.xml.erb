@@ -33,9 +33,13 @@
           echo "sonar.projectKey=<%= @path %>-$(date +%s)" > sonar-project.properties
           echo 'sonar.projectName=<%= @path %>-<%= @project %>' >> sonar-project.properties
           echo 'sonar.projectVersion=1.0' >> sonar-project.properties
-          echo 'sonar.exclusions=**/node_modules/**' >> sonar-project.properties
+          echo 'sonar.exclusions=**/node_modules/**,**/vendor/**' >> sonar-project.properties
           if [[ -d src ]]; then
             echo 'sonar.sources=src' >> sonar-project.properties
+          elif [[ "<%= @framework %>" = 'drupal7' ]]; then
+            echo 'sonar.sources=profiles,sites/all/modules' >> sonar-project.properties
+          elif [[ "<%= @framework %>" = 'drupal8' ]]; then
+            echo 'sonar.sources=profiles,modules' >> sonar-project.properties
           else
             echo 'sonar.sources=.' >> sonar-project.properties
           fi
