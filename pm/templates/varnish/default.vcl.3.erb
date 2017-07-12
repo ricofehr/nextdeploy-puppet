@@ -103,7 +103,7 @@ sub vcl_recv {
         error 303;
       }
       <%- else -%>
-      # Redirect http to https
+      # Redirect https to http
       if (req.http.X-Forwarded-Proto && req.http.X-Forwarded-Proto == "https") {
         error 301;
       }

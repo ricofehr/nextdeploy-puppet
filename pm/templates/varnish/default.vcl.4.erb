@@ -82,12 +82,12 @@ sub vcl_recv {
       <% if backend["is_ssl"] -%>
       # Redirect http to https
       if (!req.http.X-Forwarded-Proto || req.http.X-Forwarded-Proto != "https") {
-        return (synth(720, "https://" + req.http.host + "/" + req.url));
+        return (synth(720, "https://" + req.http.host + req.url));
       }
       <%- else -%>
-      # Redirect http to https
+      # Redirect https to http
       if (req.http.X-Forwarded-Proto && req.http.X-Forwarded-Proto == "https") {
-        return (synth(720, "http://" + req.http.host + "/" + req.url));
+        return (synth(720, "http://" + req.http.host + req.url));
       }
       <%- end -%>
 
@@ -119,7 +119,7 @@ sub vcl_recv {
     set req.backend_hint = jenkins;
     return (pipe);
   }
-  
+
   # Sonar backend
   if (req.http.host ~ "sonar") {
     if (! req.http.Authorization ~ "Basic <%= @basicauth %>") { return (synth(401, "Error 401")) ;}
