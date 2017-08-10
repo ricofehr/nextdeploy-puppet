@@ -319,6 +319,12 @@ class pm::ci::ciw3af {
     creates => '/opt/w3af/w3af_console'
   } ->
 
+  exec {'w3af-patch-ssldependency':
+    command => 'sed -i "s/\'pyOpenSSL\', \'0.15.1\'/\'pyOpenSSL\', \'16.2.0\'/" w3af/core/controllers/dependency_check/requirements.py',
+    cwd => '/opt/w3af',
+    creates => '/home/modem/.w3af_install',
+  } ->
+
   exec {'w3af-prerequisite':
     command => '/opt/w3af/./w3af_console || /tmp/./w3af_dependency_install.sh',
     cwd => '/opt',
