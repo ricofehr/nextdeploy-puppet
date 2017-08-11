@@ -7,7 +7,7 @@
 #
 # Eric Fehr <ricofehr@nextdeploy.io>
 #
-class pm::tool::wkhtmltopdf ($major = '0.12', $minor = '3') {
+class pm::tool::wkhtmltopdf ($major = '0.12', $minor = '4') {
   Exec { path => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/", "/usr/local/bin", "/opt/bin" ] }
 
   exec { 'tmpwkhtml':
@@ -17,7 +17,7 @@ class pm::tool::wkhtmltopdf ($major = '0.12', $minor = '3') {
   } ->
 
   exec { 'getwkhtml':
-    command => "wget http://download.gna.org/wkhtmltopdf/${major}/${major}.${minor}/wkhtmltox-${major}.${minor}_linux-generic-amd64.tar.xz",
+    command => "wget https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/${major}.${minor}/wkhtmltox-${major}.${minor}_linux-generic-amd64.tar.xz",
     cwd => '/tmp/wkhtml',
     user => 'root',
     creates => '/usr/bin/wkhtmltopdf',
