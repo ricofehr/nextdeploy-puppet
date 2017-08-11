@@ -153,7 +153,7 @@ Disallow: /'
     php::module { [ 'mysql', 'redis', 'memcached', 'gd', 'curl', 'intl', 'mcrypt', 'ldap' ]: }
   }
   else {
-    php::module { [ 'mysql', 'redis', 'memcached', 'gd', 'curl', 'intl', 'mcrypt', 'ldap', 'mbstring' ]: }
+    php::module { [ 'mysql', 'redis', 'memcached', 'gd', 'curl', 'intl', 'mcrypt', 'ldap', 'mbstring', 'bcmath' ]: }
   }
 
   # nesting level for xdebug
