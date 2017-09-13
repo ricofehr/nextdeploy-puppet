@@ -12,7 +12,8 @@ class pm::nodejs {
 
   # nodejs and ember_build prerequisites
   class { '::nodejs':
-    repo_url_suffix => "${node_version}"
+    repo_url_suffix => "${node_version}",
+    legacy_debian_symlinks => false
   }
   ->
   # ensure node binary exists
