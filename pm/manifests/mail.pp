@@ -24,6 +24,7 @@ class pm::mail {
     ensure => file,
     mode   => 644,
     content => "@${vm_name} @${nextdeployuri}
+@${vm_name}.${nextdeployuri} @${nextdeployuri}
 www-data www-data@${nextdeployuri}
 modem modem@${nextdeployuri}
 root root@${nextdeployuri}",
@@ -33,6 +34,12 @@ root root@${nextdeployuri}",
   file_line { 'addlinecanonical':
     path => '/etc/postfix/main.cf',
     line => 'sender_canonical_maps = hash:/etc/postfix/canonical'
+  } ->
+
+  exec { 'posthostname':
+    command => "sed -i 's;myhostname =.*$;myhostname = ${vm_name}.${nextdeployuri};' /etc/postfix/main.cf",
+    cwd => '/etc/postfix',
+    creates => '/etc/postfix/canonical.db'
   } ->
 
   exec { 'postmapcanonical':
