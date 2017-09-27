@@ -39,7 +39,7 @@ class pm::deploy::vhost {
   } ->
 
   exec { 'gitclone':
-    command => "git clone -b ${branch} ${gitpath} ${docroot}",
+    command => "git clone -b '${branch}' ${gitpath} ${docroot}",
     user => 'modem',
     group => 'www-data',
     cwd => '/home/modem',
