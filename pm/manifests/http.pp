@@ -11,7 +11,8 @@ class pm::http {
   Exec { path => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/", "/usr/local/bin", "/opt/bin" ] }
 
   #php7 for xenial
-  if ($::operatingsystem == 'Ubuntu' and versioncmp($::operatingsystemrelease, '16.04') < 0) or ($::operatingsystem == 'Debian' and versioncmp($::operatingsystemrelease, '9') < 0) {
+  if ($::operatingsystem == 'Ubuntu' and versioncmp($::operatingsystemrelease, '16.04') < 0) or
+     ($::operatingsystem == 'Debian' and versioncmp($::operatingsystemrelease, '9') < 0) {
     $php_folder = '/etc/php5'
     $phpdev_pkg = 'php5-dev'
   }
@@ -127,14 +128,16 @@ Disallow: /'
   #install mongo extension only if mongo is part of the project
   $ismongo = hiera("ismongo", 0)
   if $ismongo == 1 {
-    exec { "pecl-mongo":
-      command => "/usr/bin/yes '' | /usr/bin/pecl install --force mongo-1.5.8",
-      user => "root",
-      environment => ["HOME=/root"],
-      unless => "/usr/bin/test -f ${php_folder}/apache2/conf.d/20-mongo.ini",
-      require => [ Package['php-pear'], Package[$phpdev_pkg] ]
+    if ($::operatingsystem == 'Ubuntu' and versioncmp($::operatingsystemrelease, '16.04') < 0) or
+       ($::operatingsystem == 'Debian' and versioncmp($::operatingsystemrelease, '9') < 0) {
+      exec { "pecl-mongo":
+        command => "/usr/bin/yes '' | /usr/bin/pecl install --force mongo-1.5.8",
+        user => "root",
+        environment => ["HOME=/root"],
+        unless => "/usr/bin/test -f ${php_folder}/apache2/conf.d/20-mongo.ini",
+        require => [ Package['php-pear'], Package[$phpdev_pkg] ]
+      }
     }
-    ->
 
     file { "${php_folder}/apache2/conf.d/20-mongo.ini":
       content => "extension=mongo.so",
@@ -149,11 +152,12 @@ Disallow: /'
   }
 
   # mbstring on php7
-  if ($::operatingsystem == 'Ubuntu' and versioncmp($::operatingsystemrelease, '16.04') < 0) or ($::operatingsystem == 'Debian' and versioncmp($::operatingsystemrelease, '9') < 0) {
+  if ($::operatingsystem == 'Ubuntu' and versioncmp($::operatingsystemrelease, '16.04') < 0) or
+     ($::operatingsystem == 'Debian' and versioncmp($::operatingsystemrelease, '9') < 0) {
     php::module { [ 'mysql', 'redis', 'memcached', 'gd', 'curl', 'intl', 'mcrypt', 'ldap' ]: }
   }
   else {
-    php::module { [ 'mysql', 'redis', 'memcached', 'gd', 'curl', 'intl', 'mcrypt', 'ldap', 'mbstring', 'bcmath' ]: }
+    php::module { [ 'mysql', 'redis', 'memcached', 'gd', 'curl', 'intl', 'mcrypt', 'ldap', 'mbstring', 'bcmath', 'mongodb' ]: }
   }
 
   # nesting level for xdebug
